@@ -1,0 +1,23 @@
+{
+  "name": "musicappinnertube",
+  "version": "0.0.1",
+  "description": "",
+  "homepage": "https://github.com/clumsyBaboon/musicAppInnerTube#readme",
+  "bugs": {
+    "url": "https://github.com/clumsyBaboon/musicAppInnerTube/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clumsyBaboon/musicAppInnerTube.git"
+  },
+  "license": "ISC",
+  "author": "clumsyBaboon",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^44.0.0"
+  }
+}
