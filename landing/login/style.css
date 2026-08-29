@@ -7,6 +7,12 @@
     padding: 0;
     user-select: none;
 }
+.titlebar{
+    -webkit-app-region: drag;
+    height: 28px;
+    width: 100%;
+    position: absolute;
+}
 body{
     background: #1E1E1E;
     display: flex;

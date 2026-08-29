@@ -31,16 +31,16 @@ function print(data, state) {
 let win; // Основное окно
 
 // Создание окна
-const createWindow = () => {
-    console.log(workArea.width);
+function createWindow () {
     win = new BrowserWindow({
         width: 300, //1000x650
         height: 158,
-        x: (workArea.width - 300) / 2,
-        y: (workArea.height - 158) / 2,
         resizable: false,
+        titleBarStyle: 'hidden',
+        trafficLightPosition: { x: 10, y: 10 },
         // icon: path.join(__dirname, "icon.ico"),
         useContentSize: true,
+        show: false,
         webPreferences: {
             preload: path.join(__dirname, "preload.js")
         }
@@ -48,7 +48,9 @@ const createWindow = () => {
 
     win.setMenuBarVisibility(false);
     win.loadFile('./landing/login/index.html')
-//   win.webContents.openDevTools();
+    // win.webContents.openDevTools();
+
+    win.once("ready-to-show", () => win.show());
 }
 
 // При старте программы
@@ -77,10 +79,26 @@ async function connectToYoutube() {
 
         if (youtube.session.logged_in) {
             print("Autorized successfully");
-            win.loadFile(path.join(__dirname, "landing/playlists/index.html"));
-            win.setSize(1000, 650, true);
-            win.setPosition((workArea.width - 1000) / 2, (workArea.height - 650) / 2, true);
-            win.resizable = true;
+            win.close();
+            win = new BrowserWindow({
+                width: 1000,
+                height: 650,
+                minWidth: 1000,
+                minHeight: 650,
+                resizable: true,
+                titleBarStyle: 'hidden',
+                trafficLightPosition: { x: 20, y: 20 },
+                // icon: path.join(__dirname, "icon.ico"),
+                useContentSize: true,
+                show: false,
+                webPreferences: {
+                    preload: path.join(__dirname, "preload.js")
+                }
+            })
+            win.setMenuBarVisibility(false);
+            win.loadFile(path.join(__dirname, "landing/playlists/index.html"))
+            // win.webContents.openDevTools();
+            win.once("ready-to-show", () => win.show());
         }
     } catch (err) {
         print(`Func connectToYoutube. ${err.message}`, "err");
