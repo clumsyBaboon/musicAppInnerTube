@@ -1,5 +1,5 @@
 {
-  "name": "musicappinnertube",
+  "name": "music-app-innertube",
   "version": "0.0.1",
   "description": "",
   "homepage": "https://github.com/clumsyBaboon/musicAppInnerTube#readme",
@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "electron": "^44.0.0"
+  },
+  "dependencies": {
+    "youtubei.js": "^18.0.0"
   }
 }

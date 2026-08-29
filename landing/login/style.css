@@ -1,0 +1,68 @@
+@font-face {
+    font-family: "SF Pro";
+    src: url(../fonts/SF-Pro.ttf);
+}
+*{
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+body{
+    background: #1E1E1E;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+h1{
+    font-family: "SF Pro";
+    font-weight: 274;
+    line-height: 70%;
+    letter-spacing: -0.02em;
+    color: #fff;
+    position: absolute;
+    top: 40px;
+}
+.buttons{
+    top: 94px;
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+button{
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    border: none;
+    opacity: 0.9;
+}
+button:active{
+    opacity: 0.7;
+}
+button.primary{
+    background: #0088FF;
+}
+button.secondary{
+    background: rgba(0, 136, 255, 0.3);
+}
+#select{
+    width: 72px;
+}
+#saved{
+    width: 142px;
+}
+.buttons button p{
+    font-family: "SF Pro";
+    font-size: 13;
+    font-weight: 510;
+    line-height: 16px;
+}
+button.primary p{
+    color: #FFF;
+}
+button.secondary p{
+    color: #0088FF;
+}
