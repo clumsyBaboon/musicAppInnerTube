@@ -5,5 +5,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     selectCookieFile: () => ipcRenderer.send("select-cookie-file"),
     useSavedCookieFile: () => ipcRenderer.send("use-saved-cookie-file"),
 
-    onChangeLoginToLoading: callback => ipcRenderer.on("change-login-to-loading", event => callback())
+    onChangeLoginToLoading: callback => ipcRenderer.on("change-login-to-loading", () => callback()),
+
+    // Account ingo
+    signOut: () => ipcRenderer.send("sign-out"),
+    openSettings: () => ipcRenderer.send("open-settings"),
+
+    onAccountInfo: callback => ipcRenderer.on("account-info", (event, data) => callback(data)),
+
+    // Settings
+    closeSettings: data => ipcRenderer.send("close-settings", data),
+
+    onConfig: callback => ipcRenderer.on("config", (event, data) => callback(data))
 })

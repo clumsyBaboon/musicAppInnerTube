@@ -1,0 +1,73 @@
+*{
+    margin: 0;
+}
+body{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.wrapper{
+    width: 350px;
+    height: 105px;
+    background-color: #262728;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-rows: repeat(1, 25px) 50px;
+    place-items: center;
+    background: #262728;
+    padding: 15px 15px;
+    box-sizing: border-box;
+}
+h1{
+    font-family: 'SF Pro';
+    font-style: normal;
+    font-weight: 590;
+    font-size: 10px;
+    line-height: 16px;
+    color: #FFFFFF;
+}
+
+button{
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    border: none;
+    opacity: 0.9;
+    padding: 0 16px;
+}
+button:active{
+    opacity: 0.7;
+}
+button.primary{
+    background: #0088FF;
+}
+button.secondary{
+    background: rgba(0, 136, 255, 0.3);
+}
+button p{
+    font-family: "SF Pro";
+    font-size: 13;
+    font-weight: 510;
+    line-height: 16px;
+}
+button.primary p{
+    color: #FFF;
+}
+button.secondary p{
+    color: #0088FF;
+}
+input[type="checkbox"]{
+    width: 16px;
+    height: 16px;
+    border: none;
+    appearance: none;
+    background: url(../img/checkbox_uncchecked.svg);
+    border-radius: 5.5px;
+}
+input[type="checkbox"]:checked{
+    background-image: url(../img/checkbox_checked.svg);
+}

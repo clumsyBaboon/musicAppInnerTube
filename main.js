@@ -7,12 +7,17 @@ const pkg = require("./package.json");
 const VERSION = pkg.version;
 const appId = "clumsybaboon-musicappinnertube";
 const { Innertube } = require("youtubei.js");
+const { title } = require('process');
 
 let COOKIE;
 
 let youtube;
 
 let workArea;
+
+let config = {
+    autoCookie: false
+}
 
 // Функция вывода отладки в консоль
 function print(data, state) {
@@ -28,7 +33,13 @@ function print(data, state) {
     }
 }
 
+function write(data) {
+    fs.writeFileSync(path.join(__dirname, "test.json"), JSON.stringify(data, null, 2), "utf-8");
+}
+
 let win; // Основное окно
+
+let settingsWin; // Окно настроек
 
 // Создание окна
 function createWindow () {
@@ -57,6 +68,10 @@ function createWindow () {
 app.whenReady().then(() => {
     workArea = screen.getPrimaryDisplay().workArea;
     createWindow(); // Создание окна
+    win.webContents.on("did-finish-load", () => {
+        if (config.autoCookie) {useSavedCookieFile()}
+    })
+    loadConfig();
 
     // Если окно не создалось, попытка создать еще раз
     app.on('activate', () => {
@@ -96,13 +111,35 @@ async function connectToYoutube() {
                 }
             })
             win.setMenuBarVisibility(false);
-            win.loadFile(path.join(__dirname, "landing/playlists/index.html"))
-            // win.webContents.openDevTools();
-            win.once("ready-to-show", () => win.show());
+            win.loadFile(path.join(__dirname, "landing/library/index.html"))
+            win.webContents.openDevTools();
+            win.once("ready-to-show", async () => {
+                win.show();
+                const accountInfo = await youtube.account.getInfo();
+                const accountImageHref = accountInfo.contents.contents[0].account_photo[0].url;
+                const accountName = accountInfo.contents.contents[0].account_name.text;
+                win.webContents.send("account-info", { img: accountImageHref, name: accountName });
+            })
+            const library = await youtube.music.getLibrary();
+            
         }
     } catch (err) {
-        print(`Func connectToYoutube. ${err.message}`, "err");
+        print(`Func connectToYoutube. ${err}`, "err");
         win.reload();
+    }
+}
+
+function loadConfig() {
+    try {
+        const configFilePath = path.join(app.getPath("userData"), "config.json");
+        if (fs.existsSync(configFilePath)) {
+            const file = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
+            config = file;
+        } else {
+            print("Config file doesn't exists");
+        }
+    } catch (err) {
+        print(`Error in reading config file: ${err.message}`, "err");
     }
 }
 
@@ -151,7 +188,9 @@ ipcMain.on("select-cookie-file", async () => {
     connectToYoutube();
 })
 
-ipcMain.on("use-saved-cookie-file", () => {
+ipcMain.on("use-saved-cookie-file", useSavedCookieFile)
+
+function useSavedCookieFile() {
     try {
         const existsFile = fs.existsSync(path.join(app.getPath("userData"), "cookie.json"));
         if (!existsFile) {
@@ -165,6 +204,60 @@ ipcMain.on("use-saved-cookie-file", () => {
         return;
     }
     connectToYoutube();
+}
+
+ipcMain.on("sign-out", async () => {
+    const { response } = await dialog.showMessageBox({
+        type: "question",
+        buttons: ["No", "Yes"],
+        defaultId: 1,
+        cancelId: 0,
+        title: "Sign out?",
+        message: "Do you really want to sign out?"
+    })
+    if (response == 1) {
+        COOKIE = null;
+        youtube = null;
+        win.close();
+        createWindow();
+    }
+})
+
+ipcMain.on("open-settings", () => {
+    settingsWin = new BrowserWindow({
+        width: 350,
+        height: 105,
+        resizable: false,
+        trafficLightPosition: { x: 10, y: 10 },
+        // icon: path.join(__dirname, "icon.ico"),
+        useContentSize: true,
+        show: false,
+        modal: true,
+        parent: win,
+        webPreferences: {
+            preload: path.join(__dirname, "preload.js")
+        }
+    })
+
+    settingsWin.setMenuBarVisibility(false);
+    settingsWin.loadFile('./landing/settings/index.html')
+    // settingsWin.webContents.openDevTools();
+
+    settingsWin.once("ready-to-show", () => settingsWin.show());
+    settingsWin.webContents.on("did-finish-load", () => settingsWin.webContents.send("config", config))
+
+    settingsWin.on("hide", () => settingsWin.close());
+})
+
+ipcMain.on("close-settings", (event, data) => {
+    config = data;
+    try {
+        const configFilePath = path.join(app.getPath("userData"), "config.json");
+        fs.writeFileSync(configFilePath, JSON.stringify(data, null, 2), "utf-8");
+    } catch (err) {
+        print(`Error in writing config file: ${err.message}`, "err");
+    }
+    settingsWin.hide();
 })
 
 // // Ф-ция перевода MM:SS.MS в секунды

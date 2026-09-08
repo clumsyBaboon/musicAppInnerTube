@@ -60,7 +60,7 @@ button.secondary{
 #saved{
     width: 142px;
 }
-.buttons button p{
+button p{
     font-family: "SF Pro";
     font-size: 13;
     font-weight: 510;
