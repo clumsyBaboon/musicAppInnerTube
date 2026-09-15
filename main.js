@@ -6,8 +6,9 @@ const path = require("path");
 const pkg = require("./package.json");
 const VERSION = pkg.version;
 const appId = "clumsybaboon-musicappinnertube";
-const { Innertube } = require("youtubei.js");
+const { Innertube, YTNodes } = require("youtubei.js");
 const { title } = require('process');
+const { type } = require('os');
 
 let COOKIE;
 
@@ -18,6 +19,8 @@ let workArea;
 let config = {
     autoCookie: false
 }
+
+let libraryGlobal = [];
 
 // Функция вывода отладки в консоль
 function print(data, state) {
@@ -94,10 +97,11 @@ async function connectToYoutube() {
 
         if (youtube.session.logged_in) {
             print("Autorized successfully");
+            await loadLibrary();
             win.close();
             win = new BrowserWindow({
-                width: 1000,
-                height: 650,
+                width: 1200,
+                height: 700,
                 minWidth: 1000,
                 minHeight: 650,
                 resizable: true,
@@ -112,7 +116,7 @@ async function connectToYoutube() {
             })
             win.setMenuBarVisibility(false);
             win.loadFile(path.join(__dirname, "landing/library/index.html"))
-            win.webContents.openDevTools();
+            // win.webContents.openDevTools();
             win.once("ready-to-show", async () => {
                 win.show();
                 const accountInfo = await youtube.account.getInfo();
@@ -120,8 +124,6 @@ async function connectToYoutube() {
                 const accountName = accountInfo.contents.contents[0].account_name.text;
                 win.webContents.send("account-info", { img: accountImageHref, name: accountName });
             })
-            const library = await youtube.music.getLibrary();
-            
         }
     } catch (err) {
         print(`Func connectToYoutube. ${err}`, "err");
@@ -140,6 +142,20 @@ function loadConfig() {
         }
     } catch (err) {
         print(`Error in reading config file: ${err.message}`, "err");
+    }
+}
+
+async function loadLibrary() {
+    const library = await youtube.music.getLibrary();
+    const playlists = library.contents.get({ type: "Grid" }).items.filterType(YTNodes.MusicTwoRowItem);
+    for (const element of playlists) {
+        libraryGlobal.push({
+            name: element.title.text,
+            subtitle: element.subtitle.text,
+            id: element.id.startsWith("VL") ? element.id.slice(2) : element.id,
+            imgHref: element.thumbnail[0].url,
+            type: element.item_type
+        });
     }
 }
 
@@ -259,6 +275,8 @@ ipcMain.on("close-settings", (event, data) => {
     }
     settingsWin.hide();
 })
+
+ipcMain.on("require-playlist-wrapper", () => win.webContents.send("playlist-wrapper", libraryGlobal))
 
 // // Ф-ция перевода MM:SS.MS в секунды
 // function strToNumLyr(str) {

@@ -7,6 +7,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     onChangeLoginToLoading: callback => ipcRenderer.on("change-login-to-loading", () => callback()),
 
+    // Library
+    requirePlaylistWrapper: () => ipcRenderer.send("require-playlist-wrapper"),
+    onPlaylistWrapper: callback => ipcRenderer.on("playlist-wrapper", (event, data) => callback(data)),
+
     // Account ingo
     signOut: () => ipcRenderer.send("sign-out"),
     openSettings: () => ipcRenderer.send("open-settings"),
