@@ -135,6 +135,8 @@ body{
     outline-offset: -1px;
     box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45);
     border-radius: 15px;
+    box-sizing: border-box;
+    padding: 1px;
 }
 .playlistViewWrapper .mainPlaylist{
     width: 50%;
@@ -177,6 +179,7 @@ body{
     cursor: pointer;
     transition: transform ease-in-out 100ms, opacity 300ms;
     opacity: 0.6;
+    z-index: 23;
 }
 .playlistViewWrapper #closePlaylist:hover{
     transform: scale(1.2);
@@ -189,7 +192,6 @@ body{
 .playlistViewWrapper .wrapper{
     width: 100%;
     height: 100%;
-    margin-bottom: 1px;
     opacity: var(--playlist-view-wrapper-opacity);
     transition: opacity 1s;
     display: flex;
@@ -199,22 +201,40 @@ body{
     overflow-y: auto;
     z-index: 21;
     /* backdrop-filter: blur(20px); */
+    border-radius: inherit;
+}
+.playlistViewWrapper .wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+.playlistViewWrapper .wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.playlistViewWrapper .wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.playlistViewWrapper .wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
 }
 .playlistViewWrapper .wrapper .songs{
-    width: calc(100% - 2px);
+    width: calc(100% - 20px);
     height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     /* background: rgba(20, 20, 20, 0.4); */
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px) brightness(0.7);
     z-index: 22;
     padding: 30px 0;
     box-sizing: border-box;
+    border-radius: 15px;
+    outline: 1px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -1px;
+    margin-bottom: 10px;
 }
 .playlistViewWrapper .transparent-box{
-    width: calc(50% + 40px);
-    max-width: calc(40vh + 40px);
+    width: calc(50% + 60px);
+    max-width: calc(40vh + 60px);
     aspect-ratio: 1/1;
     background: transparent;
 }
@@ -261,6 +281,7 @@ body{
     background-color: transparent;
     transition: background-color 200ms;
     box-sizing: border-box;
+    user-select: none;
 }
 /* hover */
 .playlistViewWrapper .wrapper .song:hover {
@@ -270,10 +291,10 @@ body{
     background-color: rgba(255, 255, 255, 0.30);
 }
 
-.playlistViewWrapper .wrapper .song:has(img:hover) {
+.playlistViewWrapper .wrapper .song:has(.more:hover) {
     background-color: transparent;
 }
-.playlistViewWrapper .wrapper .song:has(img:active) {
+.playlistViewWrapper .wrapper .song:has(.more:active) {
     background-color: transparent;
 }
 /* hover */
@@ -282,7 +303,7 @@ body{
     line-height: 16px;
 }
 .playlistViewWrapper .wrapper .song .index{
-    width: 50px;
+    min-width: 30px;
     color: rgba(255, 255, 255, 0.6);
     text-align: center;
     font-family: "SF Pro";

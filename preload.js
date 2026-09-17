@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     requirePlaylistWrapper: () => ipcRenderer.send("require-playlist-wrapper"),
     onPlaylistWrapper: callback => ipcRenderer.on("playlist-wrapper", (event, data) => callback(data)),
 
+    loadSongs: data => ipcRenderer.invoke("load-songs", data),
+
     // Account ingo
     signOut: () => ipcRenderer.send("sign-out"),
     openSettings: () => ipcRenderer.send("open-settings"),

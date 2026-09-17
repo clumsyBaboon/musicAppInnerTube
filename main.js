@@ -27,10 +27,10 @@ function print(data, state) {
     switch (state) { // Выбор режима
         case "log": // Обычный лог
         case undefined:
-            console.log(`[${__filename}] [${VERSION}]`, data);
+            console.log(`[${path.basename(__filename)}] [${VERSION}]`, data);
             break;
         case "err": // Ошибка
-            console.error(`[${__filename}] [${VERSION}]`, data);
+            console.error(`[${path.basename(__filename)}] [${VERSION}]`, data);
             dialog.showErrorBox("Error", data); // Вывод диалог окна с ошибкой
             break;
     }
@@ -277,6 +277,42 @@ ipcMain.on("close-settings", (event, data) => {
 })
 
 ipcMain.on("require-playlist-wrapper", () => win.webContents.send("playlist-wrapper", libraryGlobal))
+
+ipcMain.handle("load-songs", async (event, data) => {
+    if (data.type == "playlist") {
+        print(`Load songs of playlist: ${data.id}`);
+        let playlist = await youtube.music.getPlaylist(data.id);
+        const allSongs = [];
+        while (true) {
+            print("Load");
+            const songs = playlist.contents.filterType(YTNodes.MusicResponsiveListItem);
+            for (const element of songs) {
+                // search author
+                let author = element.artists?.[0]?.name ?? "Unknown";
+                if (element.artists?.length > 1) author += " and more";
+                // search duration
+                let duration = element.duration?.text;
+                if (!duration) duration = element.flex_columns?.[2]?.title?.text ?? " ";
+                allSongs.push({
+                    name: element.title,
+                    author,
+                    imgHref: element.thumbnail.contents.at(-1).url,
+                    duration,
+                    id: element.id
+                })
+            }
+            if (!playlist.has_continuation) break;
+            else playlist = await playlist.getContinuation();
+        }
+        print(`Has loaded ${allSongs.length} songs`);
+        // console.log(allSongs);
+        
+        return allSongs;
+    }
+    return false;
+})
+
+
 
 // // Ф-ция перевода MM:SS.MS в секунды
 // function strToNumLyr(str) {

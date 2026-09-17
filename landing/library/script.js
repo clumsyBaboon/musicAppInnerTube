@@ -6,9 +6,47 @@ const playlistWrapperTemplate = document.querySelector("#playlistWrapperTemplate
 const playlistWrapper = document.querySelector(".playlistWrapper");
 const closePlaylistBtn = document.querySelector("#closePlaylist");
 
+const songsWrapper = document.querySelector(".playlistViewWrapper .songs");
+const songTemplate = document.querySelector("#songTemplate");
+
 const library = [];
 let openedPlaylist = "";
 let animationOpeningPlaylist = false;
+let songs = [];
+
+window.electronAPI.onPlaylistWrapper(data => {
+    for (const element of data) {
+        library.push(new Playlist(
+            element.name, element.subtitle, element.id, element.imgHref, element.type
+        ))
+    }
+})
+
+closePlaylistBtn.addEventListener("click", () => {
+    if (openedPlaylist == "" || animationOpeningPlaylist) return;
+    for (const element of library) if (element.id == openedPlaylist) element.closePlaylist();
+})
+
+class Song {
+    #song;
+    constructor (name, author, index, imgHref, duration, id) {
+        this.name = name;
+        this.author = author;
+        this.index = index;
+        this.imgHref = imgHref;
+        this.duration = duration;
+        this.id = id;
+
+        const clone = songTemplate.content.cloneNode(true);
+        this.#song = clone.querySelector(".song");
+        this.#song.querySelector("h1").textContent = this.name;
+        this.#song.querySelector("h2").textContent = this.author;
+        this.#song.querySelector(".index").textContent = this.index + 1;
+        this.#song.querySelector(".song-img").src = this.imgHref;
+        this.#song.querySelector(".duration").textContent = this.duration;
+        songsWrapper.appendChild(this.#song);
+    }
+}
 
 class Playlist {
     #playlist;
@@ -31,12 +69,27 @@ class Playlist {
         if (animationOpeningPlaylist) return;
         animationOpeningPlaylist = true;
 
+        // close opened playlist
         if (openedPlaylist != "") {
             for (const element of library) if (element.id == openedPlaylist) {
                 const elementReturn = element.closePlaylist();
                 if (elementReturn) await this.#waitForAnimation(document.querySelector(".mainPlaylist"));
                 break;
             }
+        }
+
+        songsWrapper.querySelectorAll(".song").forEach(element => element.remove());
+        songs = [];
+
+        const loadedSongs = await window.electronAPI.loadSongs({
+            type: this.type,
+            id: this.id
+        })
+        if (loadedSongs) {
+            console.log(loadedSongs);
+            for (const [index, element] of loadedSongs.entries()) songs.push(new Song(
+                element.name, element.author, index, element.imgHref, element.duration, element.id
+            ))
         }
 
         const mainPlaylist = document.querySelector(".mainPlaylist");
@@ -98,16 +151,3 @@ class Playlist {
         return new Promise(resolve => element.addEventListener("animationend", resolve, { once: true }));
     }
 }
-
-window.electronAPI.onPlaylistWrapper(data => {
-    for (const element of data) {
-        library.push(new Playlist(
-            element.name, element.subtitle, element.id, element.imgHref, element.type
-        ))
-    }
-})
-
-closePlaylistBtn.addEventListener("click", () => {
-    if (openedPlaylist == "" || animationOpeningPlaylist) return;
-    for (const element of library) if (element.id == openedPlaylist) element.closePlaylist();
-})
