@@ -1,0 +1,94 @@
+:root{
+    --opacity-music-bar: 0;
+}
+.musicbar{
+    width: calc(100% - 250px);
+    height: 70px;
+    position: absolute;
+    left: 230px;
+    bottom: 20px;
+    z-index: 23;
+    /* background-color: rgba(0, 0, 0, 0.60); */
+    outline: 1px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -1px;
+    backdrop-filter: brightness(0.6) blur(5px);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+.musicbar .control-buttons-wrapper{
+    width: auto;
+    height: 100%;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-left: 20px;
+}
+.musicbar .control-buttons-wrapper button{
+    border: none;
+    outline: none;
+    background-size: cover;
+    background-color: transparent;
+    transition: transform 200ms;
+}
+.musicbar .control-buttons-wrapper button:disabled{
+    opacity: 0.5;
+}
+.musicbar .control-buttons-wrapper button:hover{
+    transform: scale(1.2);
+    transition: transform 500ms;
+}
+.musicbar .control-buttons-wrapper button:active{
+    opacity: 0.8;
+    transition: transform 500ms;
+}
+.musicbar .btn-prev{
+    width: 40px;
+    height: 40px;
+    background-image: url(../img/prev.svg);
+}
+.musicbar .btn-next{
+    width: 40px;
+    height: 40px;
+    background-image: url(../img/next.svg);
+}
+.musicbar .btn-play-pause{
+    width: 50px;
+    height: 50px;
+    background-image: url(../img/play.svg);
+}
+.musicbar .album{
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    border-radius: 10px;
+    margin-left: 40px;
+    pointer-events: none;
+    opacity: var(--opacity-music-bar);
+    transition: opacity 500ms;
+}
+.musicbar .textWrapper{
+    width: 100%;
+    margin-left: 20px;
+    opacity: var(--opacity-music-bar);
+    transition: opacity 500ms;
+}
+.musicbar .textWrapper h1, h2{
+    width: 100%;
+}
+.musicbar .textWrapper h1{
+    color: rgba(255, 255, 255, 1);
+    font-family: "SF Pro";
+    font-size: 17px;
+    font-weight: 590;
+    line-height: 16px;
+}
+.musicbar .textWrapper h2{
+    color: rgba(255, 255, 255, 0.6);
+    font-family: "SF Pro";
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+    margin-top: 5px;
+}

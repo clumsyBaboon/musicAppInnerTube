@@ -1,14 +1,16 @@
 // Библиотеки
 const { ipcMain, dialog } = require('electron');
-const { app, BrowserWindow, screen } = require('electron/main');
+const { app, BrowserWindow, screen, Tray, nativeImage, Menu } = require('electron/main');
 const fs = require("fs");
 const path = require("path");
 const pkg = require("./package.json");
 const VERSION = pkg.version;
 const appId = "clumsybaboon-musicappinnertube";
-const { Innertube, YTNodes } = require("youtubei.js");
+const { Innertube, YTNodes, Platform } = require("youtubei.js");
 const { title } = require('process');
 const { type } = require('os');
+const { resolve } = require('dns');
+const { rejects } = require('assert');
 
 let COOKIE;
 
@@ -21,6 +23,8 @@ let config = {
 }
 
 let libraryGlobal = [];
+
+let isQuit = false;
 
 // Функция вывода отладки в консоль
 function print(data, state) {
@@ -42,6 +46,10 @@ function write(data) {
 
 let win; // Основное окно
 
+let soundWin;
+
+let tray;
+
 let settingsWin; // Окно настроек
 
 // Создание окна
@@ -58,6 +66,10 @@ function createWindow () {
         webPreferences: {
             preload: path.join(__dirname, "preload.js")
         }
+    })
+
+    win.on("close", event => {
+        app.quit();
     })
 
     win.setMenuBarVisibility(false);
@@ -78,19 +90,64 @@ app.whenReady().then(() => {
 
     // Если окно не создалось, попытка создать еще раз
     app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        if (!win.isVisible()) {
+            win.show();
+            win.focus();
         }
-    }) 
+    })
+
+    // tray
+    let icon = nativeImage.createFromPath(path.join(__dirname, "landing/img/icon.png"));
+    icon = icon.resize({ width: 22, height: 22 });
+    icon.setTemplateImage(false);
+    tray = new Tray(icon);
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: "Show",
+            click: () => {
+                if (!win.isVisible()) win.show();
+                win.focus();
+            }
+        },
+        {
+            label: "Exit",
+            click: () => {
+                isQuit = true;
+                if (win) win.close();
+                app.quit();
+            }
+        }
+    ])
+    tray.setContextMenu(contextMenu);
 })
 
-app.on('window-all-closed', () => {
-    app.quit();
+app.on("window-all-closed", event => event.preventDefault());
+
+app.on("before-quit", () => {
+    isQuit = true;
 })
+
+function createSoundWin() {
+    if (soundWin) soundWin.destroy();
+    soundWin = new BrowserWindow({
+        width: 500,
+        height: 500,
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            backgroundThrottling: false,
+            preload: path.join(__dirname, "soundPreload.js")
+        }
+    })
+    soundWin.loadFile(path.join(__dirname, "landing/playSound/index.html"));
+    soundWin.webContents.openDevTools();
+}
 
 async function connectToYoutube() {
     win.webContents.send("change-login-to-loading");
     try{
+        Platform.shim.eval = async data => new Function(data.output)();
         youtube = await Innertube.create({
             cookie: COOKIE
         })
@@ -98,7 +155,8 @@ async function connectToYoutube() {
         if (youtube.session.logged_in) {
             print("Autorized successfully");
             await loadLibrary();
-            win.close();
+            win.destroy();
+            win = null;
             win = new BrowserWindow({
                 width: 1200,
                 height: 700,
@@ -114,6 +172,13 @@ async function connectToYoutube() {
                     preload: path.join(__dirname, "preload.js")
                 }
             })
+            win.on("close", event => {
+                if (isQuit) {
+                    return;
+                }
+                event.preventDefault();
+                win.hide();
+            })
             win.setMenuBarVisibility(false);
             win.loadFile(path.join(__dirname, "landing/library/index.html"))
             // win.webContents.openDevTools();
@@ -124,6 +189,7 @@ async function connectToYoutube() {
                 const accountName = accountInfo.contents.contents[0].account_name.text;
                 win.webContents.send("account-info", { img: accountImageHref, name: accountName });
             })
+            createSoundWin();
         }
     } catch (err) {
         print(`Func connectToYoutube. ${err}`, "err");
@@ -161,7 +227,52 @@ async function loadLibrary() {
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
 
-// Спросить у пользователя где токен файл
+ipcMain.on("play-pause", () => soundWin.webContents.send("play-pause"));
+
+ipcMain.on("state-update", (event, data) => {
+    data.prevBtnDisabled = true;
+    data.nextBtnDisabled = true;
+    if (!win.isDestroyed()) win.webContents.send("state-update", data);
+})
+
+ipcMain.on("start-song", async (event, data) => {
+    const id = data.id;
+    print(`Starting song playing... ID: ${id}`);
+    const trackInfo = await youtube.music.getInfo(id);
+    const filePath = path.join(__dirname, `temp/${id}.webm`);
+    let response = {
+        title: trackInfo.basic_info.title,
+        author: trackInfo.basic_info.author,
+        imgHref: trackInfo.basic_info.thumbnail?.[0]?.url
+    };
+    if (!fs.existsSync(filePath)) {
+        const stream = await trackInfo.download({
+            type: "audio",
+            format: "webm",
+            quality: "best"
+        })
+        fs.mkdirSync(path.join(__dirname, "temp"), { recursive: true });
+        const writeStream = fs.createWriteStream(filePath);
+        for await (const chunk of stream) writeStream.write(chunk);
+        writeStream.end();
+        
+        response.filePath = await new Promise(resolve => {
+            writeStream.on("finish", () => {
+                print("Finish downloading")
+                resolve(filePath)
+            })
+            writeStream.on("error", err => {
+                print(`Error in downloading song: ${err}`, "err");
+                resolve(null);
+            })
+        })
+    } else {
+        response.filePath = filePath;
+    }
+    
+    soundWin.webContents.send("start-song", response);
+})
+
 ipcMain.on("select-cookie-file", async () => {
     const { cancelled, filePaths } = await dialog.showOpenDialog({
         title: "Select cookie file",
@@ -311,7 +422,6 @@ ipcMain.handle("load-songs", async (event, data) => {
     }
     return false;
 })
-
 
 
 // // Ф-ция перевода MM:SS.MS в секунды

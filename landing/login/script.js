@@ -5,4 +5,5 @@ document.querySelector("#saved").addEventListener("click", event => window.elect
 window.electronAPI.onChangeLoginToLoading(() => {
     document.querySelector(".buttons").style.opacity = "0";
     document.querySelector("#text-hero").textContent = "Loading...";
+    document.querySelector(".loading").style.display = "block";
 })

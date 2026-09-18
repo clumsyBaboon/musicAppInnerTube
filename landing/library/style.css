@@ -45,6 +45,8 @@ body{
     outline-offset: -1px;
     box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45);
     border-radius: 15px;
+    box-sizing: border-box;
+    padding-bottom: 80px;
 }
 .playlistWrapper::-webkit-scrollbar {
   width: 6px;
@@ -138,6 +140,15 @@ body{
     box-sizing: border-box;
     padding: 1px;
 }
+.playlistViewWrapper #playlistName{
+    color: white;
+    margin-bottom: 20px;
+    font-family: 'SF Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 25px;
+}
 .playlistViewWrapper .mainPlaylist{
     width: 50%;
     max-width: 40vh;
@@ -147,7 +158,7 @@ body{
     border-radius: 15px;
     transform-style: preserve-3d;
     opacity: 0;
-    background-image: url(../img/test_img.jpg);
+    background-image: url(../img/no_music.png);
     z-index: 20;
     /* animation: playlistOpenAnimation 1500ms infinite ease-in-out; */
 }
@@ -166,10 +177,10 @@ body{
     background-size: cover;
 }
 .playlistViewWrapper .mainPlaylist div.front{
-    background-image: url(../img/test_img.jpg);
+    background-image: url(../img/no_music.png);
 }
 .playlistViewWrapper .mainPlaylist div.back{
-    background-image: url(../img/test_img.jpg);
+    background-image: url(../img/no_music.png);
     transform: rotateY(180deg);
 }
 .playlistViewWrapper #closePlaylist{
@@ -189,6 +200,14 @@ body{
 .playlistViewWrapper #closePlaylist:active{
     opacity: 0.8;
 }
+.playlistViewWrapper #loading-playlist{
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    margin: auto 0;
+    top: 100px;
+    display: none;
+}
 .playlistViewWrapper .wrapper{
     width: 100%;
     height: 100%;
@@ -202,6 +221,8 @@ body{
     z-index: 21;
     /* backdrop-filter: blur(20px); */
     border-radius: inherit;
+    box-sizing: border-box;
+    padding-bottom: 90px;
 }
 .playlistViewWrapper .wrapper::-webkit-scrollbar {
   width: 6px;
@@ -225,12 +246,12 @@ body{
     /* background: rgba(20, 20, 20, 0.4); */
     backdrop-filter: blur(5px) brightness(0.7);
     z-index: 22;
-    padding: 30px 0;
+    padding-top: 20px;
+    padding-bottom: 10px;
     box-sizing: border-box;
     border-radius: 15px;
     outline: 1px solid rgba(255, 255, 255, 0.25);
     outline-offset: -1px;
-    margin-bottom: 10px;
 }
 .playlistViewWrapper .transparent-box{
     width: calc(50% + 60px);
@@ -315,6 +336,7 @@ body{
     width: 50px;
     height: 50px;
     margin-left: 15px;
+    border-radius: 5px;
 }
 .playlistViewWrapper .wrapper .song .textWrapper{
     width: 100%;

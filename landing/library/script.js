@@ -14,6 +14,9 @@ let openedPlaylist = "";
 let animationOpeningPlaylist = false;
 let songs = [];
 
+const startLoadingAnimation = () => document.querySelector("#loading-playlist").style.display = "block";
+const stopLoadingAnimation = () => document.querySelector("#loading-playlist").style.display = "none";
+
 window.electronAPI.onPlaylistWrapper(data => {
     for (const element of data) {
         library.push(new Playlist(
@@ -44,7 +47,14 @@ class Song {
         this.#song.querySelector(".index").textContent = this.index + 1;
         this.#song.querySelector(".song-img").src = this.imgHref;
         this.#song.querySelector(".duration").textContent = this.duration;
+        this.#song.onclick = () => this.startSong();
         songsWrapper.appendChild(this.#song);
+    }
+
+    async startSong() {
+        window.electronAPI.startSong({
+            id: this.id
+        })
     }
 }
 
@@ -78,6 +88,8 @@ class Playlist {
             }
         }
 
+        startLoadingAnimation();
+
         songsWrapper.querySelectorAll(".song").forEach(element => element.remove());
         songs = [];
 
@@ -91,6 +103,10 @@ class Playlist {
                 element.name, element.author, index, element.imgHref, element.duration, element.id
             ))
         }
+
+        document.querySelector("#playlistName").textContent = this.name;
+
+        stopLoadingAnimation();
 
         const mainPlaylist = document.querySelector(".mainPlaylist");
         const positionFrom = this.#playlist.querySelector("img").getBoundingClientRect();

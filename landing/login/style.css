@@ -72,3 +72,12 @@ button.primary p{
 button.secondary p{
     color: #0088FF;
 }
+
+.loading{
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    margin: auto 0;
+    bottom: 30px;
+    display: none;
+}

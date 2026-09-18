@@ -6,6 +6,8 @@
     <title>Youtube Music</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="../common/slidebar.css">
+    <link rel="stylesheet" href="../common/loading.css">
+    <link rel="stylesheet" href="../common/musicbar.css">
 </head>
 <body>
     <div class="wrapper">
@@ -42,12 +44,13 @@
                         <h1>Мой плейлист №3 плейлист №3</h1>
                         <h2>clumsyBaboon • 420 tracks</h2>
                     </div>
-                    <img src="../img/test_img.jpg">
+                    <img src="../img/no_music.png">
                 </div>
             </template>
         </div>
 
         <div class="playlistViewWrapper">
+            <img src="../img/loading.png" alt="loading" class="loading" id="loading-playlist">
             <div class="mainPlaylist">
                 <div class="front"></div>
                 <div class="back"></div>
@@ -55,8 +58,9 @@
             
             <div class="wrapper">
                 <img src="../img/close.svg" alt="close playlist" id="closePlaylist">
-                <div class="transparent-box"></div>                
+                <div class="transparent-box"></div>
                 <div class="songs">
+                    <h1 id="playlistName"></h1>
                     <div class="start-playlist">
                         <img src="../img/play.svg" alt="">
                         <p>Play</p>
@@ -64,7 +68,7 @@
                     <template id="songTemplate">
                         <div class="song">
                             <p class="index">1</p>
-                            <img src="../img/test_img.jpg" alt="song image" class="song-img">
+                            <img src="../img/no_music.png" alt="song image" class="song-img">
                             <div class="textWrapper">
                                 <h1>NameNameName</h1>
                                 <h2>NameNameName</h2>
@@ -73,15 +77,28 @@
                             <img src="../img/more.svg" alt="more" class="more">
                         </div>
                     </template>
-                                 
                 </div>
                 
 
             </div>
         </div>
+
+        <div class="musicbar">
+            <div class="control-buttons-wrapper">
+                <button class="btn-prev" disabled></button>
+                <button class="btn-play-pause" disabled></button>
+                <button class="btn-next" disabled></button>
+            </div>
+            <img src="../img/no_music.png" class="album">
+            <div class="textWrapper">
+                <h1>NameNameName</h1>
+                <h2>NameNameName</h2>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
+    <script src="../common/musicbar.js"></script>
     <script src="../common/sliderbar.js"></script>
 </body>
 </html>

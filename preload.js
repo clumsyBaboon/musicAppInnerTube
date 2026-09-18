@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onPlaylistWrapper: callback => ipcRenderer.on("playlist-wrapper", (event, data) => callback(data)),
 
     loadSongs: data => ipcRenderer.invoke("load-songs", data),
+    startSong: data => ipcRenderer.send("start-song", data),
 
     // Account ingo
     signOut: () => ipcRenderer.send("sign-out"),
@@ -22,5 +23,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     // Settings
     closeSettings: data => ipcRenderer.send("close-settings", data),
 
-    onConfig: callback => ipcRenderer.on("config", (event, data) => callback(data))
+    onConfig: callback => ipcRenderer.on("config", (event, data) => callback(data)),
+
+    // State
+    playPause: () => ipcRenderer.send("play-pause"),
+
+    onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
 })
