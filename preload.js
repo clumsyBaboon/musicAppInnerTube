@@ -27,6 +27,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // State
     playPause: () => ipcRenderer.send("play-pause"),
+    next: () => ipcRenderer.send("next"),
+    prev: () => ipcRenderer.send("prev"),
 
     onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
 })

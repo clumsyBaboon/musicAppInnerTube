@@ -16,6 +16,9 @@ let songs = [];
 
 const startLoadingAnimation = () => document.querySelector("#loading-playlist").style.display = "block";
 const stopLoadingAnimation = () => document.querySelector("#loading-playlist").style.display = "none";
+document.querySelector(".start-playlist").addEventListener("click", () => {
+    if (songs) songs[0].startSong();
+})
 
 window.electronAPI.onPlaylistWrapper(data => {
     for (const element of data) {
@@ -52,8 +55,11 @@ class Song {
     }
 
     async startSong() {
+        const queue = songs.map(item => Object.assign({}, item));
         window.electronAPI.startSong({
-            id: this.id
+            id: this.id,
+            queue,
+            index: this.index
         })
     }
 }

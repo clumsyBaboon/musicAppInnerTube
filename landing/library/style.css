@@ -1,3 +1,7 @@
+@font-face {
+    font-family: "SF Pro";
+    src: url(../fonts/SF-Pro.ttf);
+}
 :root{
     --position-x-playlist: none;
     --position-y-playlist: none;
@@ -99,6 +103,7 @@ body{
     width: 80px;
     height: 80px;
     border-radius: 5px;
+    outline: 2px solid rgba(100, 100, 100, 0.6);
 }
 .playlistWrapper h1, .playlistWrapper h2{
     font-family: "SF Pro";
@@ -159,6 +164,7 @@ body{
     transform-style: preserve-3d;
     opacity: 0;
     background-image: url(../img/no_music.png);
+    outline: 2px solid rgba(100, 100, 100, 0.6);
     z-index: 20;
     /* animation: playlistOpenAnimation 1500ms infinite ease-in-out; */
 }
@@ -337,6 +343,7 @@ body{
     height: 50px;
     margin-left: 15px;
     border-radius: 5px;
+    outline: 2px solid rgba(100, 100, 100, 0.6);
 }
 .playlistViewWrapper .wrapper .song .textWrapper{
     width: 100%;

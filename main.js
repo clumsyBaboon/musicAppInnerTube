@@ -19,10 +19,14 @@ let youtube;
 let workArea;
 
 let config = {
-    autoCookie: false
+    autoCookie: false,
+    cachedSongs: "medium"
 }
 
 let libraryGlobal = [];
+
+let queue = [];
+let nowPlaying = 0;
 
 let isQuit = false;
 
@@ -58,7 +62,7 @@ function createWindow () {
         width: 300, //1000x650
         height: 158,
         resizable: false,
-        titleBarStyle: 'hidden',
+        titleBarStyle: process.platform == "darwin" ? "hidden" : "default",
         trafficLightPosition: { x: 10, y: 10 },
         // icon: path.join(__dirname, "icon.ico"),
         useContentSize: true,
@@ -163,7 +167,7 @@ async function connectToYoutube() {
                 minWidth: 1000,
                 minHeight: 650,
                 resizable: true,
-                titleBarStyle: 'hidden',
+                titleBarStyle: process.platform == "darwin" ? "hidden" : "default",
                 trafficLightPosition: { x: 20, y: 20 },
                 // icon: path.join(__dirname, "icon.ico"),
                 useContentSize: true,
@@ -225,33 +229,36 @@ async function loadLibrary() {
     }
 }
 
-// ===== ФУНКЦИИ ИЗ ELECTRON =====
-
-ipcMain.on("play-pause", () => soundWin.webContents.send("play-pause"));
-
-ipcMain.on("state-update", (event, data) => {
-    data.prevBtnDisabled = true;
-    data.nextBtnDisabled = true;
-    if (!win.isDestroyed()) win.webContents.send("state-update", data);
-})
-
-ipcMain.on("start-song", async (event, data) => {
-    const id = data.id;
-    print(`Starting song playing... ID: ${id}`);
+async function startSong(id) {
     const trackInfo = await youtube.music.getInfo(id);
-    const filePath = path.join(__dirname, `temp/${id}.webm`);
+    const filePath = path.join(app.getPath("userData"), `temp/${id}.webm`);
     let response = {
         title: trackInfo.basic_info.title,
         author: trackInfo.basic_info.author,
         imgHref: trackInfo.basic_info.thumbnail?.[0]?.url
-    };
+    }
+    fs.mkdirSync(path.join(app.getPath("userData"), "temp"), { recursive: true });
+
+    // check amount of cached songs
+    let keepFilesAmount;
+    switch (config.cachedSongs) {
+        case "compact": keepFilesAmount = 15; break;
+        case "medium": keepFilesAmount = 50; break;
+        case "extended": keepFilesAmount = 100; break;
+        default: keepFilesAmount = 15; break;
+    }
+    const tempFolder = path.join(app.getPath("userData"), "temp");
+    const files = fs.readdirSync(tempFolder);
+    if (files.length > keepFilesAmount) {
+        for (const file of files) if (file != `${id}.webm`) fs.rmSync(path.join(tempFolder, file));
+    }
+
     if (!fs.existsSync(filePath)) {
         const stream = await trackInfo.download({
             type: "audio",
             format: "webm",
             quality: "best"
         })
-        fs.mkdirSync(path.join(__dirname, "temp"), { recursive: true });
         const writeStream = fs.createWriteStream(filePath);
         for await (const chunk of stream) writeStream.write(chunk);
         writeStream.end();
@@ -271,6 +278,45 @@ ipcMain.on("start-song", async (event, data) => {
     }
     
     soundWin.webContents.send("start-song", response);
+}
+
+// ===== ФУНКЦИИ ИЗ ELECTRON =====
+
+ipcMain.on("ended", () => {
+    print("Song ended");
+    if (nowPlaying < queue.length - 1) {
+        nowPlaying++;
+        startSong(queue[nowPlaying].id);
+    }
+})
+
+ipcMain.on("play-pause", () => soundWin.webContents.send("play-pause"));
+ipcMain.on("next", () => {
+    if (nowPlaying < queue.length - 1) {
+        nowPlaying++;
+        startSong(queue[nowPlaying].id);
+    }
+});
+ipcMain.on("prev", () => {
+    if (nowPlaying > 0) {
+        nowPlaying--;
+        startSong(queue[nowPlaying].id);
+    }
+});
+
+ipcMain.on("state-update", (event, data) => {
+    data.prevBtnDisabled = (nowPlaying > 0) ? false : true;
+    data.nextBtnDisabled = (nowPlaying < queue.length - 1) ? false : true;
+    if (!win.isDestroyed()) win.webContents.send("state-update", data);
+})
+
+ipcMain.on("start-song", async(event, data) => {
+    const id = data.id;
+    print(`Starting song playing... ID: ${id}`);
+    queue = data.queue;
+    nowPlaying = data.index;
+
+    startSong(id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
 })
 
 ipcMain.on("select-cookie-file", async () => {
@@ -325,12 +371,12 @@ function useSavedCookieFile() {
         } else {
             const response = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "cookie.json"), "utf-8"));
             COOKIE = response;
+            connectToYoutube();
         }
     } catch (err) {
         print(`Func use-saved-cookie-file. ${err.message}`, "err");
         return;
     }
-    connectToYoutube();
 }
 
 ipcMain.on("sign-out", async () => {
@@ -350,10 +396,12 @@ ipcMain.on("sign-out", async () => {
     }
 })
 
+ipcMain.on("next1", () => console.log(111))
+
 ipcMain.on("open-settings", () => {
     settingsWin = new BrowserWindow({
-        width: 350,
-        height: 105,
+        width: 400,
+        height: 140,
         resizable: false,
         trafficLightPosition: { x: 10, y: 10 },
         // icon: path.join(__dirname, "icon.ico"),

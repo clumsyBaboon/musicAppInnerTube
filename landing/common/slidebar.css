@@ -1,3 +1,7 @@
+@font-face {
+    font-family: "SF Pro";
+    src: url(../fonts/SF-Pro.ttf);
+}
 .slidebar{
     width: 200px;
     height: calc(100% - 20px);

@@ -19,3 +19,5 @@ window.electronAPI.onStateUpdate(data => {
 })
 
 btnPlayPause.addEventListener("click", () => window.electronAPI.playPause());
+btnNext.addEventListener("click", () => window.electronAPI.next());
+btnPrev.addEventListener("click", () => window.electronAPI.prev());

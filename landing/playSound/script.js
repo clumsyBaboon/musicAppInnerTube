@@ -74,10 +74,10 @@ if ("mediaSession" in navigator) {
         console.log("play");
     })
     navigator.mediaSession.setActionHandler("previoustrack", () => {
-        console.log("prev");
+        window.electronAPI.prev();
     })
     navigator.mediaSession.setActionHandler("nexttrack", () => {
-        console.log("next");
+        window.electronAPI.next();
     })
 }
 
@@ -85,5 +85,11 @@ audio.addEventListener("timeupdate", () => {
     if (!isActive) return;
     lastCurrentTime = audio.currentTime;
     lastDuration = audio.duration;
+    sendState();
+})
+
+audio.addEventListener("ended", () => {
+    isNowPlaying = false;
+    window.electronAPI.ended();
     sendState();
 })

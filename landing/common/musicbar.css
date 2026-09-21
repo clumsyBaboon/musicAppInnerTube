@@ -1,3 +1,7 @@
+@font-face {
+    font-family: "SF Pro";
+    src: url(../fonts/SF-Pro.ttf);
+}
 :root{
     --opacity-music-bar: 0;
 }
@@ -65,6 +69,7 @@
     border-radius: 10px;
     margin-left: 40px;
     pointer-events: none;
+    outline: 2px solid rgba(100, 100, 100, 0.6);
     opacity: var(--opacity-music-bar);
     transition: opacity 500ms;
 }
