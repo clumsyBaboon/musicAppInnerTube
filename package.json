@@ -33,7 +33,8 @@
     },
     "files": [
       "!dist/**/*",
-      "!landing/coverflow/**/*"
+      "!landing/coverflow/**/*",
+      "!how_get_cookie.docx"
     ],
     "win": {
       "target": ["nsis"]

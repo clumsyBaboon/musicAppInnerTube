@@ -228,7 +228,7 @@ body{
     /* backdrop-filter: blur(20px); */
     border-radius: inherit;
     box-sizing: border-box;
-    padding-bottom: 90px;
+    padding-bottom: 80px;
 }
 .playlistViewWrapper .wrapper::-webkit-scrollbar {
   width: 6px;
@@ -349,7 +349,7 @@ body{
     width: 100%;
     margin-left: 20px;
 }
-.playlistViewWrapper .wrapper .song .textWrapper h1, h2{
+.playlistViewWrapper .wrapper .song .textWrapper h1, .playlistViewWrapper .wrapper .song .textWrapper h2{
     width: 100%;
 }
 .playlistViewWrapper .wrapper .song .textWrapper h1{

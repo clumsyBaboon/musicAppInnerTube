@@ -84,15 +84,57 @@
         </div>
 
         <div class="musicbar">
-            <div class="control-buttons-wrapper">
-                <button class="btn-prev" disabled></button>
-                <button class="btn-play-pause" disabled></button>
-                <button class="btn-next" disabled></button>
+            <div class="wrapper-small">
+                <div class="control-buttons-wrapper">
+                    <button class="btn-prev" disabled></button>
+                    <button class="btn-play-pause" disabled></button>
+                    <button class="btn-next" disabled></button>
+                </div>
+                <img src="../img/no_music.png" class="album">
+                <div class="textWrapper">
+                    <h1></h1>
+                    <h2></h2>
+                </div>
+                
+                <!-- <div class="test"></div> -->
+                <div class="volume-wrapper">
+                    <div class="unfilled-range"></div>
+                    <div class="filled-range"></div>
+                    <input type="range" id="volume-range-small" min="0" max="100" value="30">
+                </div>
+                <button class="volume"></button>
+                <button class="open-close"></button>
             </div>
-            <img src="../img/no_music.png" class="album">
-            <div class="textWrapper">
-                <h1>NameNameName</h1>
-                <h2>NameNameName</h2>
+            <div class="wrapper-big">
+                <div class="music-player">
+                    <img src="../img/no_music.png" class="album">
+                    <div class="timeline-wrapper">
+                        <p class="current">0.05</p>
+                        <div class="timeline-range-wrapper">
+                            <div class="unfilled-range"></div>
+                            <div class="filled-range"></div>
+                            <input type="range" id="timeline-range" min="0" max="100" value="30">
+                        </div>
+                        <p class="duration">3.55</p>
+                    </div>
+                </div>
+                <div class="queue">
+                    <div class="butons-wrapper"></div>
+                    <ul class="queue-list">
+                        <li class="first" draggable="false"></li>
+                        <template id="queue-song">
+                            <li class="song" draggable="true">
+                                <img src="../img/no_music.png" alt="song image" class="song-img">
+                                <img src="../img/playing.svg" class="song-img-active">
+                                <div class="textWrapper">
+                                    <h1>NameNameName</h1>
+                                    <h2>NameNameName</h2>
+                                </div>
+                                <p class="duration">2:39</p>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

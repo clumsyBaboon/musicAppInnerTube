@@ -20,18 +20,23 @@ let workArea;
 
 let config = {
     autoCookie: false,
-    cachedSongs: "medium"
+    cachedSongs: "medium",
+    volume: 100,
+    isVolumeOn: true
 }
 
 let libraryGlobal = [];
 
 let queue = [];
 let nowPlaying = 0;
+let currentTime = 0;
+let waitForNext = false;
 
 let isQuit = false;
 
 // Функция вывода отладки в консоль
 function print(data, state) {
+    if (app.isPackaged) return;
     switch (state) { // Выбор режима
         case "log": // Обычный лог
         case undefined:
@@ -130,6 +135,9 @@ app.on("window-all-closed", event => event.preventDefault());
 app.on("before-quit", () => {
     isQuit = true;
 })
+app.on("quit", () => {
+    saveConfig();
+})
 
 function createSoundWin() {
     if (soundWin) soundWin.destroy();
@@ -164,7 +172,7 @@ async function connectToYoutube() {
             win = new BrowserWindow({
                 width: 1200,
                 height: 700,
-                minWidth: 1000,
+                minWidth: 1100,
                 minHeight: 650,
                 resizable: true,
                 titleBarStyle: process.platform == "darwin" ? "hidden" : "default",
@@ -180,6 +188,7 @@ async function connectToYoutube() {
                 if (isQuit) {
                     return;
                 }
+                saveConfig();
                 event.preventDefault();
                 win.hide();
             })
@@ -280,7 +289,49 @@ async function startSong(id) {
     soundWin.webContents.send("start-song", response);
 }
 
+function saveConfig() {
+    try {
+        const configFilePath = path.join(app.getPath("userData"), "config.json");
+        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2), "utf-8");
+    } catch (err) {
+        print(`Error in writing config file: ${err.message}`, "err");
+    }
+}
+
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+
+ipcMain.on("new-queue", (event, data) => {
+    queue = data.newQueue;
+    nowPlaying = data.nowPlaying;
+})
+
+ipcMain.on("go-to", (event, data) => {
+    if (nowPlaying + data > 0 && nowPlaying + data < queue.length) {
+        nowPlaying += data;
+        startSong(queue[nowPlaying].id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
+    }
+})
+
+ipcMain.handle("require-queue", () => ({queue, nowPlaying}) );
+
+ipcMain.on("seek-to", (event, data) => {
+    soundWin.webContents.send("seek-to", data);
+})
+
+ipcMain.handle("require-volume", () => {
+    const data = {
+        isVolumeOn: config.isVolumeOn,
+        value: config.volume
+    }
+    if (soundWin) soundWin.webContents.send("set-volume", data);
+    return data;
+})
+
+ipcMain.on("set-volume", (event, data) => {
+    config.volume = data.value;
+    config.isVolumeOn = data.isVolumeOn;
+    if (soundWin) soundWin.webContents.send("set-volume", data);
+})
 
 ipcMain.on("ended", () => {
     print("Song ended");
@@ -291,22 +342,32 @@ ipcMain.on("ended", () => {
 })
 
 ipcMain.on("play-pause", () => soundWin.webContents.send("play-pause"));
-ipcMain.on("next", () => {
-    if (nowPlaying < queue.length - 1) {
+ipcMain.on("next", async () => {
+    if (nowPlaying < queue.length - 1 && !waitForNext) {
+        waitForNext = true;
         nowPlaying++;
-        startSong(queue[nowPlaying].id);
+        await startSong(queue[nowPlaying].id);
+        waitForNext = false;
     }
 });
-ipcMain.on("prev", () => {
-    if (nowPlaying > 0) {
-        nowPlaying--;
-        startSong(queue[nowPlaying].id);
+ipcMain.on("prev", async () => {
+    if (nowPlaying > 0 && !waitForNext) {
+        if (currentTime > 10) {
+            soundWin.webContents.send("seek-to", 0);
+        } else {
+            waitForNext = true;
+            nowPlaying--;
+            await startSong(queue[nowPlaying].id);
+            waitForNext = false;
+        }
     }
 });
 
 ipcMain.on("state-update", (event, data) => {
-    data.prevBtnDisabled = (nowPlaying > 0) ? false : true;
-    data.nextBtnDisabled = (nowPlaying < queue.length - 1) ? false : true;
+    data.prevBtnDisabled = waitForNext ? true : ((nowPlaying > 0) ? false : true);
+    data.nextBtnDisabled = waitForNext ? true : ((nowPlaying < queue.length - 1) ? false : true);
+    data.nowPlaying = nowPlaying;
+    currentTime = Math.floor(data.currentTime);
     if (!win.isDestroyed()) win.webContents.send("state-update", data);
 })
 
@@ -425,13 +486,8 @@ ipcMain.on("open-settings", () => {
 })
 
 ipcMain.on("close-settings", (event, data) => {
-    config = data;
-    try {
-        const configFilePath = path.join(app.getPath("userData"), "config.json");
-        fs.writeFileSync(configFilePath, JSON.stringify(data, null, 2), "utf-8");
-    } catch (err) {
-        print(`Error in writing config file: ${err.message}`, "err");
-    }
+    for (const [key, value] of Object.entries(data)) config[key] = value;
+    saveConfig();
     settingsWin.hide();
 })
 

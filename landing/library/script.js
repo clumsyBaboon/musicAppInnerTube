@@ -1,6 +1,6 @@
-window.onload = () => {
-    window.electronAPI.requirePlaylistWrapper();
-}
+window.addEventListener("load", () => {
+  window.electronAPI.requirePlaylistWrapper();
+})
 
 const playlistWrapperTemplate = document.querySelector("#playlistWrapperTemplate");
 const playlistWrapper = document.querySelector(".playlistWrapper");
@@ -33,6 +33,13 @@ closePlaylistBtn.addEventListener("click", () => {
     for (const element of library) if (element.id == openedPlaylist) element.closePlaylist();
 })
 
+function calcAnimation(positionFrom, positionTo) {
+    const x = (positionFrom.x + positionFrom.width / 2) - (positionTo.x + positionTo.width / 2);
+    const y = (positionFrom.y + positionFrom.height / 2) - (positionTo.y + positionTo.height / 2);
+    const scale = positionFrom.width / positionTo.width;
+    return [x, y, scale];
+}
+
 class Song {
     #song;
     constructor (name, author, index, imgHref, duration, id) {
@@ -51,6 +58,7 @@ class Song {
         this.#song.querySelector(".song-img").src = this.imgHref;
         this.#song.querySelector(".duration").textContent = this.duration;
         this.#song.onclick = () => this.startSong();
+        this.#song.querySelector("img.more").onclick = event => this.openContextMenu(event);
         songsWrapper.appendChild(this.#song);
     }
 
@@ -61,6 +69,11 @@ class Song {
             queue,
             index: this.index
         })
+    }
+
+    openContextMenu(event) {
+        event.stopPropagation();
+        console.log("hello");
     }
 }
 
@@ -118,10 +131,7 @@ class Playlist {
         const positionFrom = this.#playlist.querySelector("img").getBoundingClientRect();
         const positionTo = mainPlaylist.getBoundingClientRect();
 
-        const x = (positionFrom.x + positionFrom.width / 2) - (positionTo.x + positionTo.width / 2);
-        const y = (positionFrom.y + positionFrom.height / 2) - (positionTo.y + positionTo.height / 2);
-        const scale = positionFrom.width / positionTo.width;
-        console.log(`X: ${x}, Y: ${y}, SCALE: ${scale}, ${positionFrom.width}, ${positionTo.width}`);
+        const [x, y, scale] = calcAnimation(positionFrom, positionTo);
         document.documentElement.style.setProperty("--position-x-playlist", `${x}px`);
         document.documentElement.style.setProperty("--position-y-playlist", `${y}px`);
         document.documentElement.style.setProperty("--scale-playlist", String(scale));
@@ -145,16 +155,16 @@ class Playlist {
     closePlaylist() {
         openedPlaylist = "";
         const mainPlaylist = document.querySelector(".mainPlaylist");
-        const positionTo = this.#playlist.querySelector("img").getBoundingClientRect();
-        const positionFrom = mainPlaylist.getBoundingClientRect();
+        const positionFrom = this.#playlist.querySelector("img").getBoundingClientRect();
+        const positionTo = mainPlaylist.getBoundingClientRect();
         document.documentElement.style.setProperty("--playlist-view-wrapper-opacity", "0");
-        if (positionTo.y > 0 && positionTo.y < window.innerHeight) {
-            const x = (positionTo.x + positionTo.width / 2) - (positionFrom.x + positionFrom.width / 2);
-            const y = (positionTo.y + positionTo.height / 2) - (positionFrom.y + positionFrom.height / 2);
-            const scale = positionTo.width / positionFrom.width;
+        if (positionFrom.y > 0 && positionFrom.y < window.innerHeight) {
+
+            const [x, y, scale] = calcAnimation(positionFrom, positionTo);
             document.documentElement.style.setProperty("--position-x-playlist", `${x}px`);
             document.documentElement.style.setProperty("--position-y-playlist", `${y}px`);
             document.documentElement.style.setProperty("--scale-playlist", String(scale));
+
             mainPlaylist.classList.add("animationClose");
             mainPlaylist.addEventListener("animationend", () => {
                 mainPlaylist.classList.remove("animationClose");

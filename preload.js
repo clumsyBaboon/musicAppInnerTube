@@ -29,6 +29,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     playPause: () => ipcRenderer.send("play-pause"),
     next: () => ipcRenderer.send("next"),
     prev: () => ipcRenderer.send("prev"),
+    setVolume: data => ipcRenderer.send("set-volume", data),
+    requireVolume: () => ipcRenderer.invoke("require-volume"),
+    seekTo: data => ipcRenderer.send("seek-to", data),
+    requireQueue: () => ipcRenderer.invoke("require-queue"),
+    goTo: data => ipcRenderer.send("go-to", data),
+    newQueue: data => ipcRenderer.send("new-queue", data),
 
     onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
 })

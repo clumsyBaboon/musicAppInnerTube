@@ -62,6 +62,18 @@ window.electronAPI.onPlayPause(() => {
     sendState();
 })
 
+window.electronAPI.onSetVolume(data => {
+    if (data.isVolumeOn) {
+        audio.volume = data.value / 100;
+    } else {
+        audio.volume = 0;
+    }
+})
+
+window.electronAPI.onSeekTo(data => {
+    audio.currentTime = data;
+})
+
 if ("mediaSession" in navigator) {
     navigator.mediaSession.setActionHandler("pause", () => {
         isNowPlaying = false;
