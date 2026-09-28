@@ -6,6 +6,8 @@ const playlistWrapperTemplate = document.querySelector("#playlistWrapperTemplate
 const playlistWrapper = document.querySelector(".playlistWrapper");
 const closePlaylistBtn = document.querySelector("#closePlaylist");
 
+const contextPlaylist = document.querySelector("#context-playlist");
+
 const songsWrapper = document.querySelector(".playlistViewWrapper .songs");
 const songTemplate = document.querySelector("#songTemplate");
 
@@ -40,6 +42,14 @@ function calcAnimation(positionFrom, positionTo) {
     return [x, y, scale];
 }
 
+function hideContextMenu() {
+    contextPlaylist.style.animation = "hide-context-menu 200ms linear";
+    contextPlaylist.addEventListener("animationend", () => {
+        contextPlaylist.style.display = "none";
+        contextPlaylist.style.animation = "none";
+    }, { once: true });
+}
+
 class Song {
     #song;
     constructor (name, author, index, imgHref, duration, id) {
@@ -59,6 +69,7 @@ class Song {
         this.#song.querySelector(".duration").textContent = this.duration;
         this.#song.onclick = () => this.startSong();
         this.#song.querySelector("img.more").onclick = event => this.openContextMenu(event);
+        this.#song.addEventListener("contextmenu", event => this.openContextMenu(event));
         songsWrapper.appendChild(this.#song);
     }
 
@@ -73,7 +84,45 @@ class Song {
 
     openContextMenu(event) {
         event.stopPropagation();
-        console.log("hello");
+        contextPlaylist.style.display = "flex";
+        const menuWidth = contextPlaylist.offsetWidth;
+        const menuHeight = contextPlaylist.offsetHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        let left = event.clientX;
+        let top = event.clientY;
+        if (left + menuWidth > windowWidth) left = windowWidth - menuWidth - 5;
+        if (top + menuHeight > windowHeight) top = windowHeight - menuHeight - 5;
+        contextPlaylist.style.left = `${left}px`;
+        contextPlaylist.style.top = `${top}px`;
+        const btnPlayNext = contextPlaylist.querySelector(".play-next");
+        btnPlayNext.onclick = event => this.doAnimationContextMenu(event, btnPlayNext, "play-next");
+        const btnAddToQueue = contextPlaylist.querySelector(".add-to-queue");
+        btnAddToQueue.onclick = event => this.doAnimationContextMenu(event, btnAddToQueue, "add-to-queue")
+        window.addEventListener("click", () => {
+            contextPlaylist.style.display = "none";
+        }, { once: true });
+    }
+
+    doAnimationContextMenu(event, btn, action) {
+        event.stopPropagation();
+        btn.classList.add("clicked");
+        setTimeout(() => {
+            btn.classList.remove("clicked");
+            setTimeout(() => hideContextMenu(), 50);
+        }, 50)
+        switch (action) {
+            case "play-next": {
+                const data = Object.assign({}, songs[this.index]);
+                window.electronAPI.playNext(data);
+                break;
+            }
+            case "add-to-queue": {
+                const data = Object.assign({}, songs[this.index]);
+                window.electronAPI.addToQueue(data);
+                break;
+            }
+        }
     }
 }
 

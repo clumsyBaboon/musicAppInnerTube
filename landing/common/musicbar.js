@@ -12,11 +12,11 @@ const queueList = document.querySelector(".musicbar .queue-list");
 
 let isBigMusicbarOpen = false;
 let isVolumeOn = true;
-let lastTitle = "";
+let lastId = null;
 let waitForNext = false;
 
 let queue = [];
-let nowPlaying = 0;
+let nowPlaying = -1;
 
 let putAfter = null;
 let dragIndex = 0;
@@ -102,7 +102,6 @@ window.electronAPI.onStateUpdate(data => {
         updateVolumeIcon();
     }
     btnPlayPause.style.backgroundImage = data.isNowPlaying ? "url(../img/pause.svg)" : "url(../img/play.svg)";
-    if (lastTitle != data.title) {
         albumImg.src = data.imgHref;
         albumImgBig.src = data.imgHref;
         title.textContent = data.title;
@@ -110,17 +109,15 @@ window.electronAPI.onStateUpdate(data => {
         timelineRange.max = Math.floor(data.duration);
         duration.textContent = secToMin(Math.floor(data.duration));
         if (queue && isBigMusicbarOpen) {
-            if (nowPlaying < queue.length) queue[nowPlaying].clearPlaying();
-            nowPlaying = data.nowPlaying;
+            for (const [index, element] of queue.entries()) if (index != nowPlaying) element.clearPlaying();
             queue[nowPlaying].makePlaying();
         }
-        waitForNext = false;
-    }
+        if (nowPlaying != data.nowPlaying) waitForNext = false;
+        nowPlaying = data.nowPlaying;
     if (!waitForNext) {
         btnPrev.disabled = data.prevBtnDisabled ? true : false;
         btnNext.disabled = data.nextBtnDisabled ? true : false;
     }
-    lastTitle = data.title;
     currentTime.textContent = secToMin(Math.floor(data.currentTime));
     if (!isTimelineRangeDragging) timelineRange.value = data.currentTime;
 
@@ -161,8 +158,7 @@ queueList.addEventListener("dragend", event => {
         if (nowPlaying == fromIndex) nowPlaying = toIndex;
         else if (fromIndex < toIndex && nowPlaying > fromIndex && nowPlaying <= toIndex) nowPlaying--;
         else if (fromIndex > toIndex && nowPlaying >= toIndex && nowPlaying < fromIndex) nowPlaying++;
-        console.log(`new now playing: ${nowPlaying}`);
-        console.log(newQueue);
+        for (const [index, element] of queue.entries()) element.setIndex(index);
         window.electronAPI.newQueue({
             newQueue, nowPlaying
         })
@@ -186,22 +182,27 @@ function findClosest(y) {
     return closest;
 }
 
-document.querySelector(".musicbar .open-close").addEventListener("click", async () => {
-    //require queue
+window.electronAPI.onNewQueue(data => {
+    if (isBigMusicbarOpen) newQueue(data);
+})
+function newQueue(tempQueue) {
     queueList.querySelectorAll(".song").forEach(element => element.remove());
-    const tempQueue = await window.electronAPI.requireQueue();
     queue = [];
     if (tempQueue) {
-        nowPlaying = tempQueue.nowPlaying;
         for (const [index, element] of tempQueue.queue.entries()) queue.push(new SongQueue(
             element.name, element.author, index, element.imgHref, element.duration, element.id
         ))
+        nowPlaying = tempQueue.nowPlaying;
         queue[nowPlaying].makePlaying();
         queue[nowPlaying].scrollToThis();
     }
-    
-
+}
+document.querySelector(".musicbar .open-close").addEventListener("click", async () => {
     isBigMusicbarOpen = !isBigMusicbarOpen;
+    if (isBigMusicbarOpen) {
+        const tempQueue = await window.electronAPI.requireQueue();
+        newQueue(tempQueue);
+    }
     document.querySelector(".musicbar").style.height = isBigMusicbarOpen ? "calc(100% - 40px)" : "70px";
     document.querySelector(".musicbar .open-close").style.transform = isBigMusicbarOpen ? "rotate(180deg)" : "rotate(0deg)";
     document.documentElement.style.setProperty("--backdrop-brightness", isBigMusicbarOpen ? "0.35" : "0.7");
@@ -266,5 +267,9 @@ class SongQueue {
 
     scrollToThis() {
         this.#song.scrollIntoView({ block: "center", behavior: "smooth" })
+    }
+
+    setIndex(index) {
+        this.index = index;
     }
 }

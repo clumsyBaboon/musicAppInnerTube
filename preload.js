@@ -35,6 +35,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     requireQueue: () => ipcRenderer.invoke("require-queue"),
     goTo: data => ipcRenderer.send("go-to", data),
     newQueue: data => ipcRenderer.send("new-queue", data),
+    playNext: data => ipcRenderer.send("play-next", data),
+    addToQueue: data => ipcRenderer.send("add-to-queue", data),
 
     onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
+    onNewQueue: callback => ipcRenderer.on("new-queue", (event, data) => callback(data)),
 })

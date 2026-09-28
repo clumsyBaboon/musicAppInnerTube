@@ -1,0 +1,62 @@
+.context-menu{
+    width: 244px;
+    padding: 5px;
+    display: none;
+    position: absolute;
+    flex-direction: column;
+    border-radius: 12px;
+    border: 1px solid rgba(100, 100, 100, 0.60);
+    box-shadow: 0 8px 48px 0 rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2.5px);
+    background-color: rgba(64, 64, 64, 0.8);
+    user-select: none;
+    z-index: 30;
+}
+@keyframes hide-context-menu {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+.context-menu .item{
+    width: 100%;
+    height: 24px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-radius: 8px;
+    padding: 0 7px;
+    box-sizing: border-box;
+}
+.context-menu .item:hover{
+    background-color: #0069F9;
+}
+.context-menu .item.clicked{
+    background-color: transparent !important;
+}
+.context-menu .item img{
+    width: 15px;
+    height: auto;
+}
+.context-menu p.main{
+    width: 100%;
+    font-family: "SF Pro";
+    font-size: 13px;
+    font-weight: 510;
+    color: white;
+}
+.context-menu p.shortcut{
+    color: rgba(255, 255, 255, 0.5);
+    text-wrap-mode: nowrap;
+    font-family: "SF Pro";
+    font-size: 13px;
+    font-weight: 510;
+}
+.context-menu .separator{
+    width: calc(100% - 10px);
+    height: 1px;
+    margin: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+}

@@ -299,6 +299,19 @@ function saveConfig() {
 }
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+ipcMain.on("play-next", (event, data) => {
+    if (queue) {
+        queue.splice(nowPlaying + 1, 0, data);
+        win.webContents.send("new-queue", ({queue, nowPlaying}));
+    }
+})
+
+ipcMain.on("add-to-queue", (event, data) => {
+    if (queue) {
+        queue.splice(queue.length, 0, data);
+        win.webContents.send("new-queue", ({queue, nowPlaying}));
+    }
+})
 
 ipcMain.on("new-queue", (event, data) => {
     queue = data.newQueue;
@@ -456,8 +469,6 @@ ipcMain.on("sign-out", async () => {
         createWindow();
     }
 })
-
-ipcMain.on("next1", () => console.log(111))
 
 ipcMain.on("open-settings", () => {
     settingsWin = new BrowserWindow({
