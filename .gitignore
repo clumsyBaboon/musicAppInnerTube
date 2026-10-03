@@ -2,6 +2,7 @@ node_modules/
 .DS_Store
 landing/coverflow
 test.json
+test1.json
 temp/
 dist/
 how_get_cookie.docx

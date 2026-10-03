@@ -9,8 +9,13 @@ const currentTime = document.querySelector(".musicbar .wrapper-big .current");
 const duration = document.querySelector(".musicbar .wrapper-big .duration");
 const songQueueTemplate = document.querySelector(".musicbar #queue-song");
 const queueList = document.querySelector(".musicbar .queue-list");
+const lyricsList = document.querySelector(".musicbar .lyrics-list");
+
+const queueButton = document.querySelector(".musicbar #queue-btn");
+const lyricsButton = document.querySelector(".musicbar #lyrics-btn");
 
 let isBigMusicbarOpen = false;
+let isLyricsOpened = false;
 let isVolumeOn = true;
 let lastId = null;
 let waitForNext = false;
@@ -20,6 +25,10 @@ let nowPlaying = -1;
 
 let putAfter = null;
 let dragIndex = 0;
+
+let lastLyr = null;
+let lyricsGlobal = null;
+let lyrcisType = 0; // 0 none, 1 plain, 2 synced
 
 const volumeRange = document.querySelector(".musicbar #volume-range-small");
 const volumeBtn = document.querySelector(".musicbar .volume");
@@ -95,6 +104,7 @@ function secToMin(sec) {
     return `${minutes}:${paddedSeconds}`;
 }
 
+// STATE
 window.electronAPI.onStateUpdate(data => {
     if (btnPlayPause.disabled) {
         btnPlayPause.disabled = false;
@@ -120,6 +130,7 @@ window.electronAPI.onStateUpdate(data => {
     }
     currentTime.textContent = secToMin(Math.floor(data.currentTime));
     if (!isTimelineRangeDragging) timelineRange.value = data.currentTime;
+    if (isLyricsOpened && isBigMusicbarOpen) updateLyrics(Math.floor(data.currentTime * 1000));
 
     updateTimelineRange();
 })
@@ -202,6 +213,7 @@ document.querySelector(".musicbar .open-close").addEventListener("click", async 
     if (isBigMusicbarOpen) {
         const tempQueue = await window.electronAPI.requireQueue();
         newQueue(tempQueue);
+        if (isLyricsOpened) loadNewLyrics();
     }
     document.querySelector(".musicbar").style.height = isBigMusicbarOpen ? "calc(100% - 40px)" : "70px";
     document.querySelector(".musicbar .open-close").style.transform = isBigMusicbarOpen ? "rotate(180deg)" : "rotate(0deg)";
@@ -231,6 +243,91 @@ document.querySelector(".musicbar .open-close").addEventListener("click", async 
         }, { once: true })
     }
 })
+
+queueButton.addEventListener("click", () => {
+    if (isLyricsOpened) {
+        lyricsButton.classList.remove("active");
+        queueButton.classList.add("active");
+        lyricsList.style.display = "none";
+        queueList.style.display = "block";
+    }
+    isLyricsOpened = false;
+})
+lyricsButton.addEventListener("click", () => {
+    if (!isLyricsOpened) {
+        lyricsButton.classList.add("active");
+        queueButton.classList.remove("active");
+        lyricsList.style.display = "flex";
+        queueList.style.display = "none";
+        loadNewLyrics();
+    }
+    isLyricsOpened = true;
+})
+async function loadNewLyrics() {
+    document.querySelectorAll(".musicbar .lyrics-list p").forEach(element => element.remove());
+    const loadElement = document.createElement("p");
+    loadElement.classList.add("active");
+    loadElement.textContent = "Loading...";
+    lyricsList.insertBefore(loadElement, lyricsList.lastElementChild);
+    
+    lyricsGlobal = null;
+
+    const _title = title.textContent;
+    const _author = author.textContent;
+    const _duration = timelineRange.max;
+    if (!_title || !_author || !_duration) return;
+    const [type, lyrics] = await window.electronAPI.requireLyrics({
+        title: _title, author: _author, duration: _duration
+    })
+    switch (type) {
+        case "error": {
+            loadElement.textContent = `Error: ${lyrics}`;
+            lyrcisType = 0;
+            break;
+        }
+        case "no_lyr" : {
+            loadElement.textContent = "No lyrics found";
+            lyrcisType = 0;
+            break;
+        }
+        case "plain": {
+            loadElement.remove();
+            for (const element of lyrics) {
+                const pElement = document.createElement("p");
+                pElement.classList.add("active");
+                pElement.textContent = element;
+                lyricsList.insertBefore(pElement, lyricsList.lastElementChild);
+            }
+            lyrcisType = 1;
+            break;
+        }
+        case "synced": {
+            loadElement.remove();
+            for (const element of lyrics) {
+                const pElement = document.createElement("p");
+                pElement.textContent = element.text;
+                pElement.onclick = () => window.electronAPI.seekTo(element.start_ms / 1000);
+                lyricsList.insertBefore(pElement, lyricsList.lastElementChild);
+            }
+            lyricsGlobal = lyrics;
+            lyrcisType = 2;
+            break;
+        }
+    }
+}
+function updateLyrics(curTime) {
+    if (!lyricsGlobal || lyrcisType != 2) return;
+    const pElements = document.querySelectorAll(".musicbar .lyrics-list p");
+    let lastTemp = null;
+    for (const [index, element] of lyricsGlobal.entries()) {
+        if (element.start_ms <= curTime) {
+            pElements[index].classList.add("active");
+            lastTemp = index;
+        } else pElements[index].classList.remove("active");
+    }
+    if (lastLyr != lastTemp && lastTemp) pElements[lastTemp].scrollIntoView({ block: "center", behavior: "smooth" });
+    lastLyr = lastTemp;
+}
 
 class SongQueue {
     #song;

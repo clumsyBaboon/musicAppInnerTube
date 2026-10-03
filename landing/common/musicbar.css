@@ -245,6 +245,40 @@
     position: relative;
     /* outline: 2px solid red;
     outline-offset: -2px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.musicbar .queue .butons-wrapper .buttons-background{
+    width: auto;
+    height: 36px;
+    border-radius: 1000px;
+    border: 1px solid #3F3D3D;
+    box-shadow: 0 -1px 0 0 rgba(255, 255, 255, 0.50) inset, 0 1px 0 0 rgba(255, 255, 255, 0.50) inset;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px;
+    box-sizing: border-box;
+}
+.musicbar .queue .butons-wrapper .buttons-background .item{
+    width: 120px;
+    height: 100%;
+    font-family: "SF Pro";
+    font-size: 16px;
+    font-weight: 400;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+}
+.musicbar .queue .butons-wrapper .buttons-background .item p:active{
+    filter: brightness(0.7);
+}
+.musicbar .queue .butons-wrapper .buttons-background .item.active{
+    background-color: #6d6c6c;
 }
 .musicbar .queue-list{
     width: calc(100% - 70px);
@@ -348,6 +382,45 @@
     margin-left: 10px;
     margin-right: 10px;
 }
+.musicbar .lyrics-list{
+    width: calc(100% - 70px);
+    height: 90%;
+    outline-offset: -2px;
+    box-sizing: border-box;
+    padding: 5% 0;
+    overflow-y: auto;
+    position: absolute;
+    top: 70px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+}
+.musicbar .lyrics-list p{
+    font-family: "SF Pro";
+    color: rgba(255, 255, 255, 50%);
+    font-size: 20px;
+    transition: color 200ms, font-weight 200ms, text-shadow 200ms;
+    text-align: center;
+    font-weight: 400;
+    cursor: pointer;
+}
+.musicbar .lyrics-list p.active{
+    color: rgba(255, 255, 255, 1);
+    font-size: 22px;
+    font-weight: 600;
+    text-shadow: 0 0 3px white;
+}
+.musicbar .lyrics-list p:hover{
+    color: rgba(255, 255, 255, 70%);
+}
+.musicbar .lyrics-list .wrapper{
+    min-height: 15vh;
+    background-color: transparent;
+}
+
+
 
 @keyframes playlistOpenAnimationMusicbar {
     from {

@@ -133,7 +133,16 @@
                     </div>
                 </div>
                 <div class="queue">
-                    <div class="butons-wrapper"></div>
+                    <div class="butons-wrapper">
+                        <div class="buttons-background">
+                            <div class="item active" id="queue-btn">
+                                <p>Queue</p>
+                            </div>
+                            <div class="item" id="lyrics-btn">
+                                <p>Lyrics</p>
+                            </div>
+                        </div>
+                    </div>
                     <ul class="queue-list">
                         <li class="first" draggable="false"></li>
                         <template id="queue-song">
@@ -147,6 +156,11 @@
                                 <p class="duration">2:39</p>
                             </li>
                         </template>
+                    </ul>
+                    <ul class="lyrics-list">
+                        <div class="wrapper"></div>
+                        <p class="active">Loading...</p>
+                        <div class="wrapper"></div>
                     </ul>
                 </div>
             </div>

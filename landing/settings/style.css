@@ -14,7 +14,7 @@ body{
 }
 .wrapper{
     width: 400px;
-    height: 140px;
+    height: 165px;
     background-color: #262728;
     display: grid;
     grid-template-columns: 1.5fr 0.5fr;

@@ -7,6 +7,7 @@ const pkg = require("./package.json");
 const VERSION = pkg.version;
 const appId = "clumsybaboon-musicappinnertube";
 const { Innertube, YTNodes, Platform } = require("youtubei.js");
+const yaml = require("yaml");
 const { title } = require('process');
 const { type } = require('os');
 const { resolve } = require('dns');
@@ -21,6 +22,7 @@ let workArea;
 let config = {
     autoCookie: false,
     cachedSongs: "medium",
+    typeLyrics: "synced",
     volume: 100,
     isVolumeOn: true
 }
@@ -50,7 +52,7 @@ function print(data, state) {
 }
 
 function write(data) {
-    fs.writeFileSync(path.join(__dirname, "test.json"), JSON.stringify(data, null, 2), "utf-8");
+    fs.writeFileSync(path.join(__dirname, "test1.json"), JSON.stringify(data, null, 2), "utf-8");
 }
 
 let win; // Основное окно
@@ -299,6 +301,51 @@ function saveConfig() {
 }
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+ipcMain.handle("require-lyrics", async (event, data) => {
+    print("Require new lyrics");
+    switch (config.typeLyrics) {
+        case "plain": var typeOfLyrics = 0; break;
+        case "syncsed": var typeOfLyrics = 1; break;
+        case "wordSynced": var typeOfLyrics = 2; break;
+        default: var typeOfLyrics = 1; break; 
+    }
+    const url = "https://lrclib.net/api/get";
+    const dataSend = new URLSearchParams({
+        track_name: data.title,
+        artist_name: data.author,
+        duration: data.duration
+    })
+    try {
+        const response = await fetch(`${url}?${dataSend}`);
+        if (!response.ok) {
+            const errText = await response.text();
+            console.log(`err: ${errText}, code: ${response.status}`);
+            return ["error", response.status];
+        }
+        const responseJson = await response.json();
+        const responseYaml = yaml.parse(responseJson.lyricsfile);
+        if (typeOfLyrics >= 2 && responseJson.hasWordSync) {
+            return ["error", "Working on this type. Select Plain or Synced lyrics in setting instead"];
+        }
+        if (typeOfLyrics >= 1 && responseYaml.lines?.length != 0) {
+            let sendLyr = [];
+            for (const element of responseYaml.lines) {
+                sendLyr.push(element);
+            }
+            return ["synced", sendLyr];
+        }
+        if (typeOfLyrics >= 0 && responseYaml.plain?.length != 0) {
+            const words = responseYaml.plain.split('\n');
+            return ["plain", words];
+        }
+        return ["no_lyr", null];
+
+    } catch (err) {
+        print(`Error in loading lyrics: ${err.message}`, "err");
+    }
+    return [data.title, null];
+})
+
 ipcMain.on("play-next", (event, data) => {
     if (queue) {
         queue.splice(nowPlaying + 1, 0, data);
@@ -319,7 +366,7 @@ ipcMain.on("new-queue", (event, data) => {
 })
 
 ipcMain.on("go-to", (event, data) => {
-    if (nowPlaying + data > 0 && nowPlaying + data < queue.length) {
+    if (nowPlaying + data >= 0 && nowPlaying + data < queue.length) {
         nowPlaying += data;
         startSong(queue[nowPlaying].id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
     }
@@ -473,7 +520,7 @@ ipcMain.on("sign-out", async () => {
 ipcMain.on("open-settings", () => {
     settingsWin = new BrowserWindow({
         width: 400,
-        height: 140,
+        height: 165,
         resizable: false,
         trafficLightPosition: { x: 10, y: 10 },
         // icon: path.join(__dirname, "icon.ico"),
@@ -552,7 +599,7 @@ ipcMain.handle("load-songs", async (event, data) => {
 // // Запрос на текст песни
 // ipcMain.on("require-lyrics", async (event, data) => {
 //     print("Require lyrics"); // Вывод в консоль
-//     const url = "https://lrclib.net/api/get"; // Адрес запроса
+//     const url = {"https://lrclib.net/api/get"}; // Адрес запроса
 //     // Если сейчас ничего не играет -> досрочно выхожу из ф-ции
 //     if (data[0].length == 0 || data[1].length == 0 || data[2] == 0) {
 //         print("Require lyrics err. Nothing is playing");
