@@ -108,7 +108,7 @@ app.whenReady().then(() => {
     })
 
     // tray
-    let icon = nativeImage.createFromPath(path.join(__dirname, "landing/img/icon.png"));
+    let icon = nativeImage.createFromPath(path.join(__dirname, "landing/img/icon-tray.png"));
     icon = icon.resize({ width: 22, height: 22 });
     icon.setTemplateImage(false);
     tray = new Tray(icon);

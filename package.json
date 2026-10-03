@@ -1,7 +1,7 @@
 {
   "name": "music-app-innertube",
   "productName": "Youtube Music",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "homepage": "https://github.com/clumsyBaboon/musicAppInnerTube#readme",
   "bugs": {
@@ -40,12 +40,14 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "landing/img/icon.ico"
     },
     "mac": {
       "target": [
         "dmg"
-      ]
+      ],
+      "icon": "landing/img/icon.icns"
     }
   }
 }
