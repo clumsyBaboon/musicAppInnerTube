@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     // Account ingo
     signOut: () => ipcRenderer.send("sign-out"),
     openSettings: () => ipcRenderer.send("open-settings"),
+    requireAccountInfo: () => ipcRenderer.send("require-account-info"),
 
     onAccountInfo: callback => ipcRenderer.on("account-info", (event, data) => callback(data)),
 
@@ -41,4 +42,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
     onNewQueue: callback => ipcRenderer.on("new-queue", (event, data) => callback(data)),
+
+    // Search
+    requireSearch: data => ipcRenderer.invoke("require-search", data),
+    startSongIdOnly: data => ipcRenderer.send("start-song-id-only", data),
+    playNextIdOnly: data => ipcRenderer.send("play-next-id-only", data),
+    addToQueueIdOnly: data => ipcRenderer.send("add-to-queue-id-only", data)
 })

@@ -75,6 +75,7 @@ class Song {
 
     async startSong() {
         const queue = songs.map(item => Object.assign({}, item));
+        queue.forEach(element => delete element.index);
         window.electronAPI.startSong({
             id: this.id,
             queue,
@@ -114,11 +115,13 @@ class Song {
         switch (action) {
             case "play-next": {
                 const data = Object.assign({}, songs[this.index]);
+                delete data.index;
                 window.electronAPI.playNext(data);
                 break;
             }
             case "add-to-queue": {
                 const data = Object.assign({}, songs[this.index]);
+                delete data.index;
                 window.electronAPI.addToQueue(data);
                 break;
             }

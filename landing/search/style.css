@@ -1,0 +1,276 @@
+@font-face {
+    font-family: "SF Pro";
+    src: url(../fonts/SF-Pro.ttf);
+}
+*{
+    margin: 0;
+}
+.titlebar{
+    -webkit-app-region: drag;
+    height: 30px;
+    width: 100%;
+    position: absolute;
+    z-index: 999;
+}
+body{
+    height: 100vh;
+}
+body>.wrapper{
+    background-color: #262728;
+    width: 100%;
+    height: 100%;
+    /* width: 1000px; */
+    /* height: 650px; */
+    display: flex;
+}
+.search-input-wrapper{
+    width: 100%;
+    max-width: 500px;
+    height: 50px;
+    position: fixed;
+    top: 20px;
+    z-index: 5;
+    backdrop-filter: brightness(0.7) blur(5px);
+    box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45),
+                inset -1px -1px 0px rgba(255, 255, 255, 0.3),
+                inset 1px 1px 0px rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+.search-input-wrapper img{
+    width: 32px;
+    height: 32px;
+    margin-left: 15px;
+}
+.search-input-wrapper input{
+    width: 100%;
+    margin: 0 20px 0 10px;
+    height: 36px;
+    appearance: none;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    box-shadow: none;
+    color: white;
+    font-family: "SF Pro";
+    font-size: 16px;
+}
+
+.result{
+    width: calc(100% - 230px);
+    height: calc(100% - 20px);
+    position: relative;
+    margin-left: 10px;
+    margin-top: 10px;
+    background: radial-gradient(120% 50% at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(6, 6, 6, 0.15) 100%), rgba(0, 0, 0, 0.60);
+    outline: 1px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -1px;
+    box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45);
+    border-radius: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 70px 50px 100px 50px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+.result::-webkit-scrollbar {
+  width: 6px;
+}
+.result::-webkit-scrollbar-track {
+  background: transparent;
+}
+.result::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.result::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.result #search-loading{
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    margin: auto 0;
+    top: 100px;
+    display: none;
+    z-index: 2;
+}
+
+.result .main-song, .result .main-artist{
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    position: relative;
+    /* box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45) */
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: -2px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.main-song .bg, .main-artist .bg{
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    filter: blur(50px) brightness(0.65);
+    clip-path: inset(0 round 10px);
+    z-index: 0;
+}
+.main-song .album, .main-artist .album{
+    width: 120px;
+    height: 120px;
+    z-index: 1;
+}
+.main-song .album{
+    border-radius: 10px;
+}
+.main-artist .album{
+    border-radius: 999px;
+}
+.main-song .nameWrapper, .main-artist .nameWrapper{
+    height: 100%;
+    font-family: "SF Pro";
+    z-index: 1;
+    margin-left: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.main-song .nameWrapper h1, .main-artist .nameWrapper h1{
+    font-size: 20px;
+    color: white;
+    font-weight: 600;
+}
+.main-song .nameWrapper h2, .main-artist .nameWrapper h2{
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+.main-song .buttons-wrapper, .main-artist .buttons-wrapper{
+    display: flex;
+    gap: 10px;
+}
+.main-song .buttons-wrapper .button, .main-artist .buttons-wrapper .button{
+    width: 150px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 34px;
+    box-shadow: -1px -1px 0 0 rgba(255, 255, 255, 0.20) inset, 1px 1px 0 0 rgba(255, 255, 255, 0.20) inset;
+    background-color: rgba(0, 0, 0, 0.17);
+    user-select: none;
+    transition: background-color 200ms;
+}
+.main-song .buttons-wrapper .button:hover, .main-artist .buttons-wrapper .button:hover{
+    background-color: rgba(153, 153, 153, 0.25);
+}
+.main-song .buttons-wrapper .button:active, .main-artist .buttons-wrapper .button:active{
+    background-color: rgba(153, 153, 153, 0.45);
+}
+.main-song .buttons-wrapper .button img, .main-artist .buttons-wrapper .button img{
+    width: 20px;
+    height: 20px;
+}
+.main-song .buttons-wrapper .button p, .main-artist .buttons-wrapper .button p{
+    color: rgba(255, 255, 255, 0.85);
+    font-family: "SF Pro";
+    font-size: 13px;
+    font-weight: 590;
+    line-height: 16px;
+}
+
+
+.result .regular-song, .result .regular-artist{
+    width: 100%;
+    height: 70px;
+    border-radius: 10px;
+    position: relative;
+    /* box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45) */
+    outline: 1px solid rgba(255, 255, 255, 0.3);
+    outline-offset: -1px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    background-color: transparent;
+    transition: background-color 200ms;
+}
+.regular-song:hover, .regular-artist:hover{
+    background-color: rgba(255, 255, 255, 0.15);
+}
+.regular-song .album, .regular-artist .album{
+    width: 50px;
+    height: 50px;
+    z-index: 1;
+}
+.regular-song .album{
+    border-radius: 10px;
+}
+.regular-artist .album{
+    border-radius: 999px;
+}
+.regular-song .album-play{
+    width: 50px;
+    height: 50px;
+    z-index: 2;
+    position: absolute;
+    border-radius: 9px;
+    backdrop-filter: brightness(0.2);
+    display: none;
+    cursor: pointer;
+}
+.regular-song .album-play:active{
+    opacity: 0.8;
+}
+.regular-song:hover .album-play{
+    display: block;
+}
+.regular-song .nameWrapper, .regular-artist .nameWrapper{
+    width: 100%;
+    height: 100%;
+    font-family: "SF Pro";
+    z-index: 1;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+.regular-song .nameWrapper h1, .regular-artist .nameWrapper h1{
+    font-size: 16px;
+    color: white;
+    font-weight: 600;
+}
+.regular-song .nameWrapper h2, .regular-artist .nameWrapper h2{
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+.regular-song img.more{
+    width: 30px;
+    height: 30px;
+    margin-right: 20px;
+    margin-left: 20px;
+    opacity: 0.60;
+    transition: opacity 200ms;
+    border-radius: 5px;
+}
+.regular-song img.more:hover{
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.regular-song img.more:active{
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.regular-song img.more:active{
+    opacity: 1;
+}

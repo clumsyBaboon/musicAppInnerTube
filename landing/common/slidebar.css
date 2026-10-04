@@ -3,7 +3,7 @@
     src: url(../fonts/SF-Pro.ttf);
 }
 .slidebar{
-    width: 200px;
+    min-width: 200px;
     height: calc(100% - 20px);
     background: radial-gradient(120% 50% at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(6, 6, 6, 0.15) 100%), rgba(0, 0, 0, 0.60);
     position: relative;

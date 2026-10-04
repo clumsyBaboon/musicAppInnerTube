@@ -4,6 +4,10 @@ window.electronAPI.onAccountInfo(data => {
     checkScrollingText();
 })
 
+window.addEventListener("load", () => {
+    window.electronAPI.requireAccountInfo();
+})
+
 function checkScrollingText() {
     const text = document.querySelector("#account-name");
     const scrollingWrapper = document.querySelector("#scrolling-wrapper");

@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library</title>
+    <title>Search</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="../common/slidebar.css">
     <link rel="stylesheet" href="../common/loading.css">
@@ -14,27 +13,14 @@
     <div class="wrapper">
         <div class="titlebar"></div>
 
-        <div class="context-menu" id="context-playlist">
-            <div class="item play-next">
-                <img src="../img/insert.svg">
-                <p class="main">Play next</p>
-                <p class="shortcut"></p>
-            </div>
-            <div class="item add-to-queue">
-                <img src="../img/append.svg">
-                <p class="main">Add to queue</p>
-                <p class="shortcut"></p>
-            </div>
-        </div>
-
         <div class="slidebar">
             <img src="../img/settings.svg" alt="settings" id="settings">
             <div class="buttons">
-                <button onclick="window.location.href = '../search/index.html' ">
+                <button class="active">
                     <img src="../img/search.svg" alt="search">
                     <p>Search</p>
                 </button>
-                <button class="active">
+                <button onclick="window.location.href = '../library/index.html' ">
                     <img src="../img/library.svg" alt="library">
                     <p>Library</p>
                 </button>
@@ -51,50 +37,85 @@
             </button>
         </div>
 
-        <div class="playlistWrapper">
-            <template id="playlistWrapperTemplate">
-                <div class="playlist">
-                    <div class="textWrapper">
-                        <h1>Мой плейлист №3 плейлист №3</h1>
-                        <h2>clumsyBaboon • 420 tracks</h2>
-                    </div>
-                    <img src="../img/no_music.png">
-                </div>
-            </template>
+        <div class="context-menu" id="context-search">
+            <div class="item play-next">
+                <img src="../img/insert.svg">
+                <p class="main">Play next</p>
+                <p class="shortcut"></p>
+            </div>
+            <div class="item add-to-queue">
+                <img src="../img/append.svg">
+                <p class="main">Add to queue</p>
+                <p class="shortcut"></p>
+            </div>
         </div>
 
-        <div class="playlistViewWrapper">
-            <img src="../img/loading.png" alt="loading" class="loading" id="loading-playlist">
-            <div class="mainPlaylist">
-                <div class="front"></div>
-                <div class="back"></div>
+        <div class="result">
+            <img src="../img/loading.png" class="loading" id="search-loading">
+            <div class="search-input-wrapper">
+                <img src="../img/search.svg">
+                <input type="text" id="search-input" placeholder="Search">
             </div>
-            
-            <div class="wrapper">
-                <img src="../img/close.svg" alt="close playlist" id="closePlaylist">
-                <div class="transparent-box"></div>
-                <div class="songs">
-                    <h1 id="playlistName"></h1>
-                    <div class="start-playlist">
-                        <img src="../img/play.svg" alt="">
-                        <p>Play</p>
-                    </div>
-                    <template id="songTemplate">
-                        <div class="song">
-                            <p class="index">1</p>
-                            <img src="../img/no_music.png" alt="song image" class="song-img">
-                            <div class="textWrapper">
-                                <h1>NameNameName</h1>
-                                <h2>NameNameName</h2>
+            <template id="main-song-template">
+                <div class="main-song song">
+                    <img src="../img/test_img.jpg" class="album">
+                    <img src="../img/test_img.jpg" class="bg">
+                    <div class="nameWrapper">
+                        <h1>NameNameName</h1>
+                        <h2>AuthorAuthorAuthor</h2>
+                        <div class="buttons-wrapper">
+                            <div class="button play">
+                                <img src="../img/play_context.svg">
+                                <p>Play</p>
                             </div>
-                            <p class="duration">2:39</p>
-                            <img src="../img/more.svg" alt="more" class="more">
+                            <div class="button play-next">
+                                <img src="../img/insert.svg">
+                                <p>Play next</p>
+                            </div>
+                            <div class="button add-to-queue">
+                                <img src="../img/append.svg">
+                                <p>Add to queue</p>
+                            </div>
                         </div>
-                    </template>
+                    </div>
                 </div>
-                
-
-            </div>
+            </template>
+            <template id="reqular-song-template">
+                <div class="regular-song song">
+                    <img src="../img/test_img.jpg" class="album">
+                    <img src="../img/play.svg" class="album-play">
+                    <div class="nameWrapper">
+                        <h1>NameNameName</h1>
+                        <h2>AuthorAuthorAuthor</h2>
+                    </div>
+                    <img src="../img/more.svg" alt="more" class="more">
+                </div>
+            </template>
+            <template id="main-artist-template">
+                <div class="main-artist song">
+                    <img src="../img/test_img.jpg" class="album">
+                    <img src="../img/test_img.jpg" class="bg">
+                    <div class="nameWrapper">
+                        <h1>NameNameName</h1>
+                        <h2>AuthorAuthorAuthor</h2>
+                        <div class="buttons-wrapper">
+                            <div class="button shuffle">
+                                <img src="../img/play_context.svg">
+                                <p>Shuffle</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template id="regular-artist-template">
+                <div class="regular-artist song">
+                    <img src="../img/test_img.jpg" class="album">
+                    <div class="nameWrapper">
+                        <h1>NameNameName</h1>
+                        <h2>AuthorAuthorAuthor</h2>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <div class="musicbar">

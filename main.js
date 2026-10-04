@@ -300,7 +300,76 @@ function saveConfig() {
     }
 }
 
+function secToMin(sec) {
+    const minutes = Math.floor(sec / 60);
+    const seconds = Math.floor(sec) % 60;
+    const paddedSeconds = String(seconds).padStart(2, "0");
+    return `${minutes}:${paddedSeconds}`;
+}
+
+function playNext(data) {
+    if (queue) {
+        queue.splice(nowPlaying + 1, 0, data);
+        win.webContents.send("new-queue", ({queue, nowPlaying}));
+    }
+}
+
+function addToQueue(data) {
+    if (queue) {
+        queue.splice(queue.length, 0, data);
+        win.webContents.send("new-queue", ({queue, nowPlaying}));
+    }
+}
+
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+ipcMain.handle("require-search", async (event, data) => {
+    const search = await youtube.music.search(data);
+    const contentsLoaded = search.contents;
+    let content = [];
+    for (const element of contentsLoaded) {
+        if (element.type == "MusicCardShelf" && element.subtitle?.runs?.[0]?.text == "Song") {
+            content.push({
+                type: "main_song",
+                title: element.title.text,
+                subtitle: element.subtitle.text,
+                id: element.title.runs?.[0].endpoint.payload.videoId,
+                imgHref: element.thumbnail?.contents?.[0].url
+            })
+        } else if (element.type == "MusicCardShelf" && element.subtitle?.runs?.[0]?.text == "Artist") {
+            content.push({
+                type: "main_artist",
+                title: element.title.text,
+                subtitle: element.subtitle.text,
+                id: element.title.runs?.[0].endpoint.payload.browseId,
+                imgHref: element.thumbnail?.contents?.[0].url
+            })
+        } else if (element.type == "ItemSection" &&
+                   element.contents?.[0]?.type == "MusicResponsiveListItem" &&
+                   element.contents?.[0].item_type == "song") {
+            let author = element.contents[0].artists?.[0]?.name ?? "Unknown";
+            if (element.contents[0].artists?.length > 1) author += " and more";
+            content.push({
+                type: "regular_song",
+                title: element.contents[0].title ?? "Unknown",
+                author,
+                id: element.contents[0].id,
+                imgHref: element.contents[0].thumbnail.contents?.[0].url
+            })
+        } else if (element.type == "ItemSection" &&
+                   element.contents?.[0]?.type == "MusicResponsiveListItem" &&
+                   element.contents?.[0].item_type == "artist") {
+            content.push({
+                type: "regular_artist",
+                title: element.contents[0].name,
+                subtitle: element.contents[0].subtitle.text,
+                id: element.contents[0].id,
+                imgHref: element.contents[0].thumbnail.contents?.[0].url
+            })
+        }
+    }
+    return content;
+})
+
 ipcMain.handle("require-lyrics", async (event, data) => {
     print("Require new lyrics");
     switch (config.typeLyrics) {
@@ -346,18 +415,32 @@ ipcMain.handle("require-lyrics", async (event, data) => {
     return [data.title, null];
 })
 
-ipcMain.on("play-next", (event, data) => {
-    if (queue) {
-        queue.splice(nowPlaying + 1, 0, data);
-        win.webContents.send("new-queue", ({queue, nowPlaying}));
-    }
-})
+ipcMain.on("play-next", (event, data) => playNext(data));
+ipcMain.on("add-to-queue", (event, data) => addToQueue(data));
 
-ipcMain.on("add-to-queue", (event, data) => {
-    if (queue) {
-        queue.splice(queue.length, 0, data);
-        win.webContents.send("new-queue", ({queue, nowPlaying}));
+ipcMain.on("play-next-id-only", async (event, data) => {
+    const id = data;
+    const songInfo = await youtube.music.getInfo(id);
+    const dataSend = {
+        name: songInfo.basic_info.title,
+        author: songInfo.basic_info.author,
+        imgHref: songInfo.basic_info.thumbnail[0].url,
+        duration: secToMin(songInfo.basic_info.duration),
+        id: songInfo.basic_info.id
     }
+    playNext(dataSend);
+})
+ipcMain.on("add-to-queue-id-only", async (event, data) => {
+    const id = data;
+    const songInfo = await youtube.music.getInfo(id);
+    const dataSend = {
+        name: songInfo.basic_info.title,
+        author: songInfo.basic_info.author,
+        imgHref: songInfo.basic_info.thumbnail[0].url,
+        duration: secToMin(songInfo.basic_info.duration),
+        id: songInfo.basic_info.id
+    }
+    addToQueue(dataSend);
 })
 
 ipcMain.on("new-queue", (event, data) => {
@@ -431,11 +514,27 @@ ipcMain.on("state-update", (event, data) => {
     if (!win.isDestroyed()) win.webContents.send("state-update", data);
 })
 
-ipcMain.on("start-song", async(event, data) => {
+ipcMain.on("start-song", (event, data) => {
     const id = data.id;
     print(`Starting song playing... ID: ${id}`);
     queue = data.queue;
     nowPlaying = data.index;
+
+    startSong(id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
+})
+
+ipcMain.on("start-song-id-only", async (event, data) => {
+    const id = data;
+    print(`Starting song playing... ID: ${id}`);
+    const songInfo = await youtube.music.getInfo(id);
+    queue = [{
+        name: songInfo.basic_info.title,
+        author: songInfo.basic_info.author,
+        imgHref: songInfo.basic_info.thumbnail[0].url,
+        duration: secToMin(songInfo.basic_info.duration),
+        id: songInfo.basic_info.id
+    }]
+    nowPlaying = 0;
 
     startSong(id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
 })
@@ -581,70 +680,17 @@ ipcMain.handle("load-songs", async (event, data) => {
         // console.log(allSongs);
         
         return allSongs;
+    } else if (data.type == "artist") {
+        print(`Load songs of artist: ${data.id}`);
     }
     return false;
 })
 
-
-// // Ф-ция перевода MM:SS.MS в секунды
-// function strToNumLyr(str) {
-//     const posDots = str.indexOf(':'); // Нахождения позиции [:]
-//     const posDot = str.indexOf('.'); // Нахождение позиции [.]
-//     const min = Number(str.slice(0, posDots));
-//     const sec = Number(str.slice(posDots + 1, posDot));
-//     const ms = Number(str.slice(posDot + 1));
-//     return min * 60000 + sec * 1000 + ms; // Возвращаю результат
-// }
-
-// // Запрос на текст песни
-// ipcMain.on("require-lyrics", async (event, data) => {
-//     print("Require lyrics"); // Вывод в консоль
-//     const url = {"https://lrclib.net/api/get"}; // Адрес запроса
-//     // Если сейчас ничего не играет -> досрочно выхожу из ф-ции
-//     if (data[0].length == 0 || data[1].length == 0 || data[2] == 0) {
-//         print("Require lyrics err. Nothing is playing");
-//         return;
-//     }
-//     // Параметры для GET запроса
-//     const data_send = new URLSearchParams({
-//         track_name: data[0], // Название трека
-//         artist_name: data[1], // Название исполнителя
-//         duration: data[2] // Длина трека
-//     })
-//     try {
-//         const response = await fetch(`${url}?${data_send}`); // Формирую запроса
-//         if (!response.ok) { // Если ошибка
-//             const errText = await response.text(); // Текст ошибки
-//             throw new Error(`Status: ${response.status} - ${errText}`);
-//         }
-//         const responseJson = await response.json(); // Результат в json-е
-//         let res; // Переменная для будущих слов
-//         let type; // Тип будущих слов 
-//         if (responseJson.syncedLyrics == null) { // Если в результате нет переменной с синхронизированными словами, то использовать обычные !добавить выбор!
-//             res = responseJson.plainLyrics.split('\n').map(element => ["plain", element]);
-//                         // Переменую делю по \n и меняю каждый елемент. Пример:
-//                         // ["Текст1 \n Текст2 \n Текст3"] -> [["plain", "Текст1"], ["plain", "Текст2"], ["plain", "Текст3"]]
-//             type = "plain"; // Задаю тип
-//         } else { // Синхронизированные слова построчно
-//             res = responseJson.syncedLyrics.split('\n').map(element => { // Переменую делю по \n и меняю каждый елемент
-//                 // Данные из syncedLyrics: "[00:17.12] I feel your breath upon my neck\n ... [MM:SS:MS] text"
-//                 const posOpen = element.indexOf("[") + 1; // Первая цифра находится по этому индексу (позиция скобки + 1)
-//                 const posClose = element.indexOf("]"); // Правая скобка находится по этому индексу
-//                 // Метод slice вырезает включительно с первым аргументом, но не включительно со вторым
-//                 const time = strToNumLyr(element.slice(posOpen, posClose)); // Передаю ф-ции которая вернет результат в миллисекундах
-//                 const lyr = element.slice(posClose + 2); // Первая буква слов начинается Позиция ] + 2
-//                                                          // Между словами и правой скобкой всегда стоит пробел
-//                 return [time, lyr]; // Результат записываеся таким образом
-//             });
-//             type = "syn"; // Задаю тип
-//         }
-//         // Отправляю результат в electron
-//         win.webContents.send("lyrics-update", {
-//             lyr: res,
-//             type: type
-//         });
-//         print("Lyrics were send to renderer"); // Вывожу результат в консоль
-//     } catch (err) { // Если ошибка
-//         print(`Error in fetch: ${err}`); // Вывод в консоль
-//     }
-// })
+ipcMain.on("require-account-info", async () => {
+    if (youtube.session.logged_in) {
+        const accountInfo = await youtube.account.getInfo();
+        const accountImageHref = accountInfo.contents.contents[0].account_photo[0].url;
+        const accountName = accountInfo.contents.contents[0].account_name.text;
+        win.webContents.send("account-info", { img: accountImageHref, name: accountName });
+    }
+})

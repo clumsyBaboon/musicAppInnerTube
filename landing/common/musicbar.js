@@ -26,6 +26,7 @@ let nowPlaying = -1;
 let putAfter = null;
 let dragIndex = 0;
 
+let lastLyrName = null;
 let lastLyr = null;
 let lyricsGlobal = null;
 let lyrcisType = 0; // 0 none, 1 plain, 2 synced
@@ -112,18 +113,18 @@ window.electronAPI.onStateUpdate(data => {
         updateVolumeIcon();
     }
     btnPlayPause.style.backgroundImage = data.isNowPlaying ? "url(../img/pause.svg)" : "url(../img/play.svg)";
-        albumImg.src = data.imgHref;
-        albumImgBig.src = data.imgHref;
-        title.textContent = data.title;
-        author.textContent = data.artist;
-        timelineRange.max = Math.floor(data.duration);
-        duration.textContent = secToMin(Math.floor(data.duration));
-        if (queue && isBigMusicbarOpen) {
-            for (const [index, element] of queue.entries()) if (index != nowPlaying) element.clearPlaying();
-            queue[nowPlaying].makePlaying();
-        }
-        if (nowPlaying != data.nowPlaying) waitForNext = false;
-        nowPlaying = data.nowPlaying;
+    albumImg.src = data.imgHref;
+    albumImgBig.src = data.imgHref;
+    title.textContent = data.title;
+    author.textContent = data.artist;
+    timelineRange.max = Math.floor(data.duration);
+    duration.textContent = secToMin(Math.floor(data.duration));
+    if (queue && isBigMusicbarOpen) {
+        for (const [index, element] of queue.entries()) if (index != nowPlaying) element.clearPlaying();
+        queue[nowPlaying].makePlaying();
+    }
+    if (nowPlaying != data.nowPlaying) waitForNext = false;
+    nowPlaying = data.nowPlaying;
     if (!waitForNext) {
         btnPrev.disabled = data.prevBtnDisabled ? true : false;
         btnNext.disabled = data.nextBtnDisabled ? true : false;
@@ -131,7 +132,7 @@ window.electronAPI.onStateUpdate(data => {
     currentTime.textContent = secToMin(Math.floor(data.currentTime));
     if (!isTimelineRangeDragging) timelineRange.value = data.currentTime;
     if (isLyricsOpened && isBigMusicbarOpen) updateLyrics(Math.floor(data.currentTime * 1000));
-
+    if (isLyricsOpened && lastLyrName != data.title) loadNewLyrics();
     updateTimelineRange();
 })
 
@@ -165,6 +166,7 @@ queueList.addEventListener("dragend", event => {
         const [element] = queue.splice(fromIndex, 1);
         queue.splice(toIndex, 0, element);
         const newQueue = queue.map(item => Object.assign({}, item));
+        newQueue.forEach(element => delete element.index)
         //give new now playing
         if (nowPlaying == fromIndex) nowPlaying = toIndex;
         else if (fromIndex < toIndex && nowPlaying > fromIndex && nowPlaying <= toIndex) nowPlaying--;
@@ -275,6 +277,7 @@ async function loadNewLyrics() {
     const _title = title.textContent;
     const _author = author.textContent;
     const _duration = timelineRange.max;
+    lastLyrName = _title;
     if (!_title || !_author || !_duration) return;
     const [type, lyrics] = await window.electronAPI.requireLyrics({
         title: _title, author: _author, duration: _duration
