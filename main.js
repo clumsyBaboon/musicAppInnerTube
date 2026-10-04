@@ -6,7 +6,7 @@ const path = require("path");
 const pkg = require("./package.json");
 const VERSION = pkg.version;
 const appId = "clumsybaboon-musicappinnertube";
-const { Innertube, YTNodes, Platform } = require("youtubei.js");
+const { Innertube, YTNodes, Platform, Parser } = require("youtubei.js");
 const yaml = require("yaml");
 const { title } = require('process');
 const { type } = require('os');
@@ -162,6 +162,7 @@ async function connectToYoutube() {
     win.webContents.send("change-login-to-loading");
     try{
         Platform.shim.eval = async data => new Function(data.output)();
+        Parser.setParserErrorHandler(error => console.warn(`[ERROR IN PARSER] ${error.message}`));
         youtube = await Innertube.create({
             cookie: COOKIE
         })
@@ -323,6 +324,8 @@ function addToQueue(data) {
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
 ipcMain.handle("require-search", async (event, data) => {
+    try {
+
     const search = await youtube.music.search(data);
     const contentsLoaded = search.contents;
     let content = [];
@@ -332,16 +335,16 @@ ipcMain.handle("require-search", async (event, data) => {
                 type: "main_song",
                 title: element.title.text,
                 subtitle: element.subtitle.text,
-                id: element.title.runs?.[0].endpoint.payload.videoId,
-                imgHref: element.thumbnail?.contents?.[0].url
+                id: element.title.runs?.[0]?.endpoint.payload.videoId,
+                imgHref: element.thumbnail?.contents?.[0]?.url
             })
         } else if (element.type == "MusicCardShelf" && element.subtitle?.runs?.[0]?.text == "Artist") {
             content.push({
                 type: "main_artist",
                 title: element.title.text,
                 subtitle: element.subtitle.text,
-                id: element.title.runs?.[0].endpoint.payload.browseId,
-                imgHref: element.thumbnail?.contents?.[0].url
+                id: element.title.runs?.[0]?.endpoint.payload.browseId,
+                imgHref: element.thumbnail?.contents?.[0]?.url
             })
         } else if (element.type == "ItemSection" &&
                    element.contents?.[0]?.type == "MusicResponsiveListItem" &&
@@ -363,11 +366,12 @@ ipcMain.handle("require-search", async (event, data) => {
                 title: element.contents[0].name,
                 subtitle: element.contents[0].subtitle.text,
                 id: element.contents[0].id,
-                imgHref: element.contents[0].thumbnail.contents?.[0].url
+                imgHref: element.contents[0].thumbnail.contents?.[0]?.url
             })
         }
     }
     return content;
+    } catch (err) {console.log(err)};
 })
 
 ipcMain.handle("require-lyrics", async (event, data) => {
