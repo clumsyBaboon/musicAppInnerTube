@@ -27,7 +27,6 @@
     "youtubei.js": "^18.1.0"
   },
   "build": {
-    "asar": false,
     "appId": "com.clumsyBaboon.ytmusic",
     "productName": "Youtube Music",
     "directories": {
