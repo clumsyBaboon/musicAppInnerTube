@@ -682,6 +682,21 @@ ipcMain.handle("load-songs", async (event, data) => {
         return allSongs;
     } else if (data.type == "artist") {
         print(`Load songs of artist: ${data.id}`);
+        const artist = await youtube.music.getArtist(data.id);
+        const songs = await artist.getAllSongs();
+        const allSongs = [];
+        for (const element of songs.contents.filterType(YTNodes.MusicResponsiveListItem)) {
+            let author = element.artists?.[0]?.name ?? "Unknown";
+            if (element.artists?.length > 1) author += " and more";
+            allSongs.push({
+                name: element.title,
+                author,
+                imgHref: element.thumbnail.contents?.at(-1).url,
+                duration: element.duration.text,
+                id: element.id
+            })
+        }
+        return allSongs;
     }
     return false;
 })
