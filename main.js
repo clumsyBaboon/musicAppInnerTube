@@ -324,8 +324,6 @@ function addToQueue(data) {
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
 ipcMain.handle("require-search", async (event, data) => {
-    try {
-
     const search = await youtube.music.search(data);
     const contentsLoaded = search.contents;
     let content = [];
@@ -371,7 +369,6 @@ ipcMain.handle("require-search", async (event, data) => {
         }
     }
     return content;
-    } catch (err) {console.log(err)};
 })
 
 ipcMain.handle("require-lyrics", async (event, data) => {
