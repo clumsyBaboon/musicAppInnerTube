@@ -22,6 +22,7 @@ let waitForNext = false;
 
 let queue = [];
 let nowPlaying = -1;
+let isNowPlaying = false;
 
 let putAfter = null;
 let dragIndex = 0;
@@ -114,7 +115,9 @@ window.electronAPI.onStateUpdate(data => {
     }
     btnPlayPause.style.backgroundImage = data.isNowPlaying ? "url(../img/pause.svg)" : "url(../img/play.svg)";
     albumImg.src = data.imgHref;
+    document.querySelector(".musicbar .bg").src = data.imgHref;
     albumImgBig.src = data.imgHref;
+    if (isBigMusicbarOpen) albumImgBig.style.transform = data.isNowPlaying ? "scale(1)" : "scale(0.8)";
     title.textContent = data.title;
     author.textContent = data.artist;
     timelineRange.max = Math.floor(data.duration);
@@ -125,6 +128,7 @@ window.electronAPI.onStateUpdate(data => {
     }
     if (nowPlaying != data.nowPlaying) waitForNext = false;
     nowPlaying = data.nowPlaying;
+    isNowPlaying = data.isNowPlaying;
     if (!waitForNext) {
         btnPrev.disabled = data.prevBtnDisabled ? true : false;
         btnNext.disabled = data.nextBtnDisabled ? true : false;
@@ -217,9 +221,6 @@ document.querySelector(".musicbar .open-close").addEventListener("click", async 
         newQueue(tempQueue);
         if (isLyricsOpened) loadNewLyrics();
     }
-    document.querySelector(".musicbar").style.height = isBigMusicbarOpen ? "calc(100% - 40px)" : "70px";
-    document.querySelector(".musicbar .open-close").style.transform = isBigMusicbarOpen ? "rotate(180deg)" : "rotate(0deg)";
-    document.documentElement.style.setProperty("--backdrop-brightness", isBigMusicbarOpen ? "0.35" : "0.7");
     //animation
     const positionFrom = albumImg.getBoundingClientRect();
     const positionTo = albumImgBig.getBoundingClientRect();
@@ -227,6 +228,7 @@ document.querySelector(".musicbar .open-close").addEventListener("click", async 
     document.documentElement.style.setProperty("--position-x-playlist-musicbar", `${x}px`);
     document.documentElement.style.setProperty("--position-y-playlist-musicbar", `${y}px`);
     document.documentElement.style.setProperty("--scale-playlist-musicbar", String(scale));
+    document.documentElement.style.setProperty("--scale-from-to-musicbar", isNowPlaying ? "1" : "0.8");
     if (isBigMusicbarOpen) {
         albumImg.style.opacity = "0";
         albumImgBig.style.opacity = "1";
@@ -238,12 +240,18 @@ document.querySelector(".musicbar .open-close").addEventListener("click", async 
     } else {
         document.documentElement.style.setProperty("--opacity-big-music-bar", "0");
         albumImgBig.classList.add("animationClose");
-        albumImgBig.addEventListener("animationend", () => {
-            albumImg.style.opacity = "1";
-            albumImgBig.style.opacity = "0";
-            albumImgBig.classList.remove("animationClose");
-        }, { once: true })
+        await new Promise(resolve => albumImgBig.addEventListener("animationend", resolve, { once: true }));
+        albumImg.style.opacity = "1";
+        albumImgBig.style.opacity = "0";
+        albumImgBig.classList.remove("animationClose");
     }
+    document.querySelector(".musicbar").style.height = isBigMusicbarOpen ? "calc(100% - 20px)" : "70px";
+    document.querySelector(".musicbar").style.width = isBigMusicbarOpen ? "calc(100% - 20px)" : "calc(100% - 250px)";
+    document.querySelector(".musicbar").style.left = isBigMusicbarOpen ? "10px" : "230px";
+    document.querySelector(".musicbar").style.bottom = isBigMusicbarOpen ? "10px" : "20px";
+    document.querySelector(".musicbar").style.borderRadius = isBigMusicbarOpen ? "15px" : "30px";
+    document.querySelector(".musicbar .open-close").style.transform = isBigMusicbarOpen ? "rotate(180deg)" : "rotate(0deg)";
+    document.documentElement.style.setProperty("--backdrop-brightness", isBigMusicbarOpen ? "0.35" : "0.7");
 })
 
 queueButton.addEventListener("click", () => {

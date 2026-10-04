@@ -11,6 +11,7 @@
     --position-x-playlist-musicbar: none;
     --position-y-playlist-musicbar: none;
     --scale-playlist-musicbar: none;
+    --scale-from-to-musicbar: none;
 }
 .musicbar{
     width: calc(100% - 250px);
@@ -26,8 +27,17 @@
     backdrop-filter: brightness(var(--backdrop-brightness)) blur(5px);
     border-radius: 30px;
     user-select: none;
-    transition: height 800ms ease-in-out, backdrop-filter 500ms;
+    transition: height 800ms ease-in-out, width 800ms ease-in-out, left 800ms ease-in-out,
+                top 800ms ease-in-out, bottom 800ms ease-in-out,
+                border-radius 800ms ease-in-out, backdrop-filter 500ms;
     overflow: hidden;
+}
+.musicbar .bg{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    filter: brightness(0.5) blur(50px);
 }
 .musicbar .wrapper-small{
     width: 100%;
@@ -198,11 +208,13 @@
 }
 .musicbar .music-player .album{
     width: 80%;
+    max-width: 60vh;
     aspect-ratio: 1 / 1;
     border-radius: 15px;
     outline: 2px solid rgba(100, 100, 100, 0.6);
     margin-top: 10%;
     z-index: 24;
+    transition: transform 200ms ease-in-out;
 }
 .musicbar .music-player .album.animationOpen{
     animation: playlistOpenAnimationMusicbar 1000ms ease-in-out;
@@ -443,13 +455,13 @@
         transform: translateX(var(--position-x-playlist-musicbar)) translateY(var(--position-y-playlist-musicbar)) scale(var(--scale-playlist-musicbar));
     }
     to{
-        transform: translateX(0) translateY(0) scale(1);
+        transform: translateX(0) translateY(0) scale(var(--scale-from-to-musicbar));
     }
 }
 
 @keyframes playlistCloseAnimationMusicbar {
     from{
-        transform: translateX(0) translateY(0) scale(1);
+        transform: translateX(0) translateY(0) scale(var(--scale-from-to-musicbar));
     }
     to{
         transform: translateX(var(--position-x-playlist-musicbar)) translateY(var(--position-y-playlist-musicbar)) scale(var(--scale-playlist-musicbar));
