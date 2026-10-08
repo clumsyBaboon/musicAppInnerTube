@@ -147,12 +147,22 @@ body>.wrapper{
 }
 .playlistViewWrapper #playlistName{
     color: white;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-family: 'SF Pro';
     font-style: normal;
     font-weight: 600;
     font-size: 30px;
     line-height: 25px;
+}
+.playlistViewWrapper .subtitle{
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 5px;
+    font-family: "SF Pro";
+    font-weight: 600;
+    font-size: 16px;
+}
+.playlistViewWrapper #subtitle-2{
+    margin-bottom: 15px;
 }
 .playlistViewWrapper .mainPlaylist{
     width: 50%;

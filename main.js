@@ -655,6 +655,8 @@ ipcMain.handle("load-songs", async (event, data) => {
     if (data.type == "playlist") {
         print(`Load songs of playlist: ${data.id}`);
         let playlist = await youtube.music.getPlaylist(data.id);
+        const subtitle = playlist?.header?.subtitle?.text ?? "";
+        const subtitle2 = playlist?.header?.second_subtitle?.text ?? "";
         const allSongs = [];
         while (true) {
             print("Load");
@@ -680,11 +682,18 @@ ipcMain.handle("load-songs", async (event, data) => {
         print(`Has loaded ${allSongs.length} songs`);
         // console.log(allSongs);
         
-        return allSongs;
+        return {data: allSongs, subtitle, subtitle2};
     } else if (data.type == "artist") {
         print(`Load songs of artist: ${data.id}`);
         const artist = await youtube.music.getArtist(data.id);
         const songs = await artist.getAllSongs();
+        let subtitle = "";
+        for (const element of libraryGlobal) {
+            if (element.id == data.id) {
+                subtitle = element.subtitle;
+                break;
+            }
+        }
         const allSongs = [];
         for (const element of songs.contents.filterType(YTNodes.MusicResponsiveListItem)) {
             let author = element.artists?.[0]?.name ?? "Unknown";
@@ -697,7 +706,25 @@ ipcMain.handle("load-songs", async (event, data) => {
                 id: element.id
             })
         }
-        return allSongs;
+        return {data: allSongs, subtitle, subtitle2: ""};
+    } else if (data.type == "album") {
+        print(`Load songs of album: ${data.id}`);
+        const album = await youtube.music.getAlbum(data.id);
+        const subtitle = album?.header?.subtitle?.text ?? "";
+        const subtitle2 = album?.header?.second_subtitle?.text ?? "";
+        const author = album?.header?.strapline_text_one?.text ?? "";
+        const thumbnail = album.header.thumbnail.contents?.at(-1).url;
+        const allSongs = [];
+        for (const element of album.contents.filterType(YTNodes.MusicResponsiveListItem)) {
+            allSongs.push({
+                name: element.title,
+                author,
+                imgHref: thumbnail,
+                duration: element.duration.text,
+                id: element.id
+            })
+        }
+        return {data: allSongs, subtitle, subtitle2};
     }
     return false;
 })

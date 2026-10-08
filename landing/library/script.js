@@ -170,9 +170,11 @@ class Playlist {
         })
         if (loadedSongs) {
             console.log(loadedSongs);
-            for (const [index, element] of loadedSongs.entries()) songs.push(new Song(
+            for (const [index, element] of loadedSongs.data.entries()) songs.push(new Song(
                 element.name, element.author, index, element.imgHref, element.duration, element.id
             ))
+            document.querySelector(".playlistViewWrapper #subtitle").textContent = loadedSongs.subtitle;
+            document.querySelector(".playlistViewWrapper #subtitle-2").textContent = loadedSongs.subtitle2;
         }
 
         document.querySelector("#playlistName").textContent = this.name;
