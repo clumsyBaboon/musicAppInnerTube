@@ -4,6 +4,7 @@
 }
 *{
     margin: 0;
+    user-select: none;
 }
 .titlebar{
     -webkit-app-region: drag;
@@ -256,7 +257,8 @@ body>.wrapper{
     color: rgba(255, 255, 255, 0.6);
     font-weight: 600;
 }
-.regular-song img.more{
+
+.regular-song img.more, .top-song img.more{
     width: 30px;
     height: 30px;
     margin-right: 20px;
@@ -265,12 +267,198 @@ body>.wrapper{
     transition: opacity 200ms;
     border-radius: 5px;
 }
-.regular-song img.more:hover{
+.regular-song img.more:hover, .top-song img.more:hover{
     background-color: rgba(255, 255, 255, 0.1);
 }
-.regular-song img.more:active{
+.regular-song img.more:active, .top-song img.more:active{
     background-color: rgba(255, 255, 255, 0.2);
-}
-.regular-song img.more:active{
     opacity: 1;
+}
+
+.artist{
+    width: calc(90% - 230px);
+    height: calc(100% - 180px);
+    position: fixed;
+    box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45);
+    background: transparent;
+    border-radius: 15px;
+    /* transform: rotateY(180deg); */
+    transform-style: preserve-3d;
+    z-index: 0;
+    opacity: 0;
+    outline: 1px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -1px;
+    backdrop-filter: brightness(0.6) blur(5px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+.artist::-webkit-scrollbar {
+  width: 6px;
+}
+.artist::-webkit-scrollbar-track {
+  background: transparent;
+}
+.artist::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.artist::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.artist.openAnimation{
+    animation: playlistOpenAnimationArtist 350ms ease-in-out;
+}
+.artist.closeAnimation{
+    animation: playlistCloseAnimationArtist 350ms ease-in-out;
+}
+.artist .header{
+    width: 100%;
+    min-height: 250px;
+    position: relative;
+    border-radius: inherit;
+    overflow: hidden;
+    padding: 0 5%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.artist .header img{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    object-position: top;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.4) 80%, transparent 100%);
+    z-index: 6;
+}
+.artist .header h1, .artist .header h2{
+    position: relative;
+    z-index: 7;
+    bottom: 20%;
+    font-family: "SF Pro";
+    font-weight: 700;
+}
+.artist .header h1{
+    color: white;
+    font-size: 24px;
+}
+.artist .header h2{
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+}
+.artist #closeArtist{
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    cursor: pointer;
+    transition: transform ease-in-out 100ms, opacity 300ms;
+    opacity: 0.6;
+    z-index: 23;
+}
+.artist #closeArtist:hover{
+    transform: scale(1.2);
+    opacity: 1;
+    transition: transfrom ease-in-out 200ms;
+}
+.artist #closeArtist:active{
+    opacity: 0.8;
+}
+
+.artist .top-songs{
+    width: 90%;
+    height: auto;
+    margin-top: 30px;
+}
+.artist .top-songs>h1{
+    font-family: "SF Pro";
+    color: white;
+    font-size: 26px;
+    font-weight: 650;
+    margin-bottom: 10px;
+}
+.top-songs .top-song{
+    width: 100%;
+    height: 50px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    border-radius: 10px;
+    transition: background-color 200ms;
+}
+.artist .top-song:hover{
+    background-color: rgba(255, 255, 255, 0.15);
+}
+.top-song img{
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+}
+.artist .top-song .album-play{
+    width: 40px;
+    height: 40px;
+    z-index: 8;
+    position: absolute;
+    border-radius: 5px;
+    backdrop-filter: brightness(0.2);
+    display: none;
+    cursor: pointer;
+}
+.artist .top-song .album-play:active{
+    opacity: 0.8;
+}
+.artist .top-song:hover .album-play{
+    display: block;
+}
+.top-song h1, .top-song h2{
+    font-family: "SF Pro";
+    font-weight: 550;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.top-song h1{
+    color: white;
+    font-size: 14px;
+    width: 100%;
+}
+.top-song h2{
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+    min-width: 15%;
+}
+
+@keyframes playlistOpenAnimationArtist {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+    50%{
+        opacity: 1;
+    }
+    80%{
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes playlistCloseAnimationArtist {
+    from{
+        transform: scale(1);
+        opacity: 1;
+    }
+    to{
+        transform: scale(0.6);
+        opacity: 0;
+    }
 }

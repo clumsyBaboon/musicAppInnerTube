@@ -46,6 +46,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     // Search
     requireSearch: data => ipcRenderer.invoke("require-search", data),
     startSongIdOnly: data => ipcRenderer.send("start-song-id-only", data),
+    startAlbumIdOnly: data => ipcRenderer.send("start-album-id-only", data),
     playNextIdOnly: data => ipcRenderer.send("play-next-id-only", data),
-    addToQueueIdOnly: data => ipcRenderer.send("add-to-queue-id-only", data)
+    addToQueueIdOnly: data => ipcRenderer.send("add-to-queue-id-only", data),
+    playNextAlbumIdOnly: data => ipcRenderer.send("play-next-album-id-only", data),
+    addToQueueAlbumIdOnly: data => ipcRenderer.send("add-to-queue-album-id-only", data),
+    requireArtist: data => ipcRenderer.invoke("require-artist", data),
+    shuffleArtist: data => ipcRenderer.send("shuffle-artist", data)
 })

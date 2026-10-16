@@ -51,6 +51,29 @@
         </div>
 
         <div class="result">
+            <div class="artist">
+                <div class="header">
+                    <h1>Maneskin</h1>
+                    <h2>189M monthly audience</h2>
+                    <img src="../img/test_img.jpg">
+                </div>
+                    <div class="top-songs">
+                    <h1>Top songs</h1>
+                    <template id="top-song-template">
+                        <div class="top-song">
+                            <img src="../img/test_img.jpg">
+                            <img src="../img/play.svg" class="album-play">
+                            <h1 class="title"></h1>
+                            <h2 class="author"></h2>
+                            <h2 class="plays"></h2>
+                            <h2 class="album"></h2>
+                            <img src="../img/more.svg" alt="more" class="more">
+                        </div>
+                    </template>
+                </div>
+                <img src="../img/close.svg" alt="close" id="closeArtist">
+            </div>
+
             <img src="../img/loading.png" class="loading" id="search-loading">
             <div class="search-input-wrapper">
                 <img src="../img/search.svg">
@@ -114,6 +137,40 @@
                         <h1>NameNameName</h1>
                         <h2>AuthorAuthorAuthor</h2>
                     </div>
+                </div>
+            </template>
+            <template id="main-album-template">
+                <div class="main-song song">
+                    <img src="../img/test_img.jpg" class="album">
+                    <img src="../img/test_img.jpg" class="bg">
+                    <div class="nameWrapper">
+                        <h1>NameNameName</h1>
+                        <h2>AuthorAuthorAuthor</h2>
+                        <div class="buttons-wrapper">
+                            <div class="button play">
+                                <img src="../img/play_context.svg">
+                                <p>Play</p>
+                            </div>
+                            <div class="button play-next">
+                                <img src="../img/insert.svg">
+                                <p>Play next</p>
+                            </div>
+                            <div class="button add-to-queue">
+                                <img src="../img/append.svg">
+                                <p>Add to queue</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template id="regular-album-template">
+                <div class="regular-song song">
+                    <img src="../img/test_img.jpg" class="album">
+                    <div class="nameWrapper">
+                        <h1>NameNameName</h1>
+                        <h2>AuthorAuthorAuthor</h2>
+                    </div>
+                    <img src="../img/more.svg" alt="more" class="more">
                 </div>
             </template>
         </div>

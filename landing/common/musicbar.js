@@ -18,7 +18,6 @@ let isBigMusicbarOpen = false;
 let isLyricsOpened = false;
 let isVolumeOn = true;
 let lastId = null;
-let waitForNext = false;
 
 let queue = [];
 let nowPlaying = -1;
@@ -126,13 +125,10 @@ window.electronAPI.onStateUpdate(data => {
         for (const [index, element] of queue.entries()) if (index != nowPlaying) element.clearPlaying();
         queue[nowPlaying].makePlaying();
     }
-    if (nowPlaying != data.nowPlaying) waitForNext = false;
     nowPlaying = data.nowPlaying;
     isNowPlaying = data.isNowPlaying;
-    if (!waitForNext) {
-        btnPrev.disabled = data.prevBtnDisabled ? true : false;
-        btnNext.disabled = data.nextBtnDisabled ? true : false;
-    }
+    btnPrev.disabled = data.prevBtnDisabled ? true : false;
+    btnNext.disabled = data.nextBtnDisabled ? true : false;
     currentTime.textContent = secToMin(Math.floor(data.currentTime));
     if (!isTimelineRangeDragging) timelineRange.value = data.currentTime;
     if (isLyricsOpened && isBigMusicbarOpen) updateLyrics(Math.floor(data.currentTime * 1000));
@@ -144,13 +140,11 @@ btnPlayPause.addEventListener("click", () => window.electronAPI.playPause());
 btnNext.addEventListener("click", () => {
     btnNext.disabled = true;
     btnPrev.disabled = true;
-    waitForNext = true;
     window.electronAPI.next();
 })
 btnPrev.addEventListener("click", () => {
     btnNext.disabled = true;
     btnPrev.disabled = true;
-    waitForNext = true;
     window.electronAPI.prev();
 });
 

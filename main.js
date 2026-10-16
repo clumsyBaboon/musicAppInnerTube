@@ -323,6 +323,65 @@ function addToQueue(data) {
 }
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+ipcMain.on("shuffle-artist", async (event, id) => {
+    const artist = await youtube.music.getArtist(id);
+    const songs = await artist.getAllSongs();
+    queue = [];
+    nowPlaying = 0;
+
+    for (const element of songs.contents.filterType(YTNodes.MusicResponsiveListItem)) {
+        let author = element.artists?.[0]?.name ?? "Unknown";
+        if (element.artists?.length > 1) author += " and more";
+        queue.push({
+            name: element.title,
+            author,
+            imgHref: element.thumbnail.contents?.at(-1).url,
+            duration: element.duration.text,
+            id: element.id
+        })
+    }
+    startSong(queue[0].id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
+})
+
+ipcMain.on("start-album-id-only", async (event, id) => {
+    const album = await youtube.music.getAlbum(id);
+    queue = [];
+    nowPlaying = 0;
+    for (const element of album.contents.filterType(YTNodes.MusicResponsiveListItem)) {
+        queue.push({
+            name: element.title,
+            author: album?.header?.strapline_text_one?.text ?? "Unknown",
+            imgHref: album.header.thumbnail.contents?.at(-1).url,
+            duration: element.duration.text,
+            id: element.id
+        })
+    }
+    startSong(queue[0].id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
+})
+
+ipcMain.handle("require-artist", async (event, id) => {
+    const artist = await youtube.music.getArtist(id);
+    const dataSend = {
+        header: {
+            imgHref: artist.header?.thumbnail?.contents?.[0]?.url,
+            title: artist.header?.title?.text
+        },
+        topSongs: []
+    }
+    //topSongs
+    for (const element of artist.sections?.[0].contents.filterType(YTNodes.MusicResponsiveListItem)) {
+        dataSend.topSongs.push({
+            title: element.title,
+            author: element.flex_columns?.[1]?.title?.text,
+            plays: element.flex_columns?.[2]?.title?.text,
+            album: element.flex_columns?.[3].title?.text,
+            imgHref: element.thumbnail?.contents?.at(-1)?.url,
+            id: element.id 
+        })
+    }
+    return dataSend;
+})
+
 ipcMain.handle("require-search", async (event, data) => {
     const search = await youtube.music.search(data);
     const contentsLoaded = search.contents;
@@ -339,6 +398,14 @@ ipcMain.handle("require-search", async (event, data) => {
         } else if (element.type == "MusicCardShelf" && element.subtitle?.runs?.[0]?.text == "Artist") {
             content.push({
                 type: "main_artist",
+                title: element.title.text,
+                subtitle: element.subtitle.text,
+                id: element.title.runs?.[0]?.endpoint.payload.browseId,
+                imgHref: element.thumbnail?.contents?.[0]?.url
+            })
+        } else if (element.type == "MusicCardShelf" && element.subtitle?.runs?.[0]?.text == "Album") {
+            content.push({
+                type: "main_album",
                 title: element.title.text,
                 subtitle: element.subtitle.text,
                 id: element.title.runs?.[0]?.endpoint.payload.browseId,
@@ -364,6 +431,16 @@ ipcMain.handle("require-search", async (event, data) => {
                 title: element.contents[0].name,
                 subtitle: element.contents[0].subtitle.text,
                 id: element.contents[0].id,
+                imgHref: element.contents[0].thumbnail.contents?.[0]?.url
+            })
+        } else if (element.type == "ItemSection" &&
+                   element.contents?.[0]?.type == "MusicResponsiveListItem" &&
+                   element.contents?.[0].item_type == "album") {
+            content.push({
+                type: "regular_album",
+                title: element.contents?.[0].title ?? "Unknown",
+                subtitle: element.contents?.[0].flex_columns?.[1].title?.text ?? "",
+                id: element.contents?.[0].id,
                 imgHref: element.contents[0].thumbnail.contents?.[0]?.url
             })
         }
@@ -443,6 +520,32 @@ ipcMain.on("add-to-queue-id-only", async (event, data) => {
     }
     addToQueue(dataSend);
 })
+ipcMain.on("play-next-album-id-only", async (event, data) => {
+    const id = data;
+    const album = await youtube.music.getAlbum(id);
+    for (const element of album.contents.filterType(YTNodes.MusicResponsiveListItem).toReversed()) {
+        playNext({
+            name: element.title,
+            author: album?.header?.strapline_text_one?.text ?? "Unknown",
+            imgHref: album.header.thumbnail.contents?.at(-1).url,
+            duration: element.duration.text,
+            id: element.id
+        })
+    }
+})
+ipcMain.on("add-to-queue-album-id-only", async (event, data) => {
+    const id = data;
+    const album = await youtube.music.getAlbum(id);
+    for (const element of album.contents.filterType(YTNodes.MusicResponsiveListItem)) {
+        addToQueue({
+            name: element.title,
+            author: album?.header?.strapline_text_one?.text ?? "Unknown",
+            imgHref: album.header.thumbnail.contents?.at(-1).url,
+            duration: element.duration.text,
+            id: element.id
+        })
+    }
+})
 
 ipcMain.on("new-queue", (event, data) => {
     queue = data.newQueue;
@@ -499,11 +602,10 @@ ipcMain.on("prev", async () => {
         if (currentTime > 10) {
             soundWin.webContents.send("seek-to", 0);
         } else {
-            waitForNext = true;
             nowPlaying--;
             await startSong(queue[nowPlaying].id);
-            waitForNext = false;
         }
+        waitForNext = false;
     }
 });
 
