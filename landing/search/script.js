@@ -8,6 +8,8 @@ const regularArtistTemplate = document.querySelector("#regular-artist-template")
 const mainAlbumTemplate = document.querySelector("#main-album-template");
 const regularAlbumTemplate = document.querySelector("#regular-album-template");
 const resultWrapper = document.querySelector(".result");
+const songsWrapper = document.querySelector(".albumDiv .songs");
+const songAlbumTemplate = document.querySelector(".albumDiv #song-album-template");
 
 const contextSearch = document.querySelector("#context-search");
 
@@ -17,21 +19,14 @@ document.addEventListener("keydown", event => {
 })
 
 const artistDiv = document.querySelector(".artist");
+const albumDiv = document.querySelector(".albumDiv");
 artistDiv.querySelector("#closeArtist").addEventListener("click", closeArtist);
-function closeArtist() {
-    isArtistOpen = false;
-    artistDiv.classList.add("closeAnimation");
-    artistDiv.addEventListener("animationend", () => {
-        artistDiv.classList.remove("closeAnimation");
-        artistDiv.style.zIndex = "0";
-        artistDiv.style.opacity = "0";
-    }, { once: true });
-    escAction = () => {};
-}
+albumDiv.querySelector("#closeAlbum").addEventListener("click", closeAlbum);
 
 let result = [];
 
 let isArtistOpen = false;
+let isAlbumOpen = false;
 
 searchInput.addEventListener("keydown", async event => {
     if (event.key == "Enter") {
@@ -123,29 +118,98 @@ async function openArtist(id) {
     escAction = closeArtist;
 
     const data = await window.electronAPI.requireArtist(id);
-    if (!data) return;
     console.log(data);
-    artistDiv.querySelector(".header img").src = data.header.imgHref;
-    artistDiv.querySelector(".header h1").textContent = data.header.title;
-    //topSongs
-    document.querySelectorAll(".artist .top-songs .top-song").forEach(element => element.remove());
-    for (const element of data.topSongs) {
-        const clone = document.querySelector("#top-song-template").content.cloneNode(true).querySelector(".top-song");
-        clone.querySelector("img").src = element.imgHref;
-        clone.querySelector(".title").textContent = element.title;
-        clone.querySelector(".author").textContent = element.author;
-        clone.querySelector(".plays").textContent = element.plays;
-        clone.querySelector(".album").textContent = element.album;
-        clone.querySelector("img.more").onclick = event => openContextMenu(event, element.id);
-        clone.addEventListener("contextmenu", event => openContextMenu(event, element.id));
-        clone.querySelector(".album-play").onclick = () => window.electronAPI.startSongIdOnly(element.id);
-        document.querySelector(".artist .top-songs").appendChild(clone);
+    if (data) {
+        artistDiv.querySelector(".header img").src = data.header.imgHref;
+        artistDiv.querySelector(".header h1").textContent = data.header.title;
+        //topSongs
+        document.querySelectorAll(".artist .top-songs .top-song").forEach(element => element.remove());
+        for (const element of data.topSongs) {
+            const clone = document.querySelector("#top-song-template").content.cloneNode(true).querySelector(".top-song");
+            clone.querySelector("img").src = element.imgHref;
+            clone.querySelector(".title").textContent = element.title;
+            clone.querySelector(".author").textContent = element.author;
+            clone.querySelector(".plays").textContent = element.plays;
+            clone.querySelector(".album").textContent = element.album;
+            clone.querySelector("img.more").onclick = event => openContextMenu(event, element.id);
+            clone.addEventListener("contextmenu", event => openContextMenu(event, element.id));
+            clone.querySelector(".album-play").onclick = () => window.electronAPI.startSongIdOnly(element.id);
+            document.querySelector(".artist .top-songs").appendChild(clone);
+        }
+        document.querySelectorAll(".artist .albums .wrapper .album-artist").forEach(element => element.remove());
+        for (const element of data.albums) {
+            const clone = document.querySelector(".artist #album-artist-template").content.cloneNode(true).querySelector(".album-artist");
+            clone.querySelector("img").src = element.imgHref;
+            clone.querySelector("h1").textContent = element.title;
+            clone.querySelector("h2").textContent = element.year;
+            clone.onclick = () => openAlbum(element.id);
+            document.querySelector(".artist .albums .wrapper").appendChild(clone);
+        }
     }
 
     artistDiv.style.zIndex = "6";
     artistDiv.style.opacity = "1";
     artistDiv.classList.add("openAnimation");
     artistDiv.addEventListener("animationend", () => artistDiv.classList.remove("openAnimation"), { once: true });
+}
+function closeArtist() {
+    isArtistOpen = false;
+    artistDiv.classList.add("closeAnimation");
+    artistDiv.addEventListener("animationend", () => {
+        artistDiv.classList.remove("closeAnimation");
+        artistDiv.style.zIndex = "0";
+        artistDiv.style.opacity = "0";
+    }, { once: true });
+    escAction = () => {};
+}
+
+async function openAlbum(id) {
+    if (isAlbumOpen) return;
+    isAlbumOpen = true;
+    escAction = closeAlbum;
+
+    songsWrapper.querySelectorAll(".song-album").forEach(element => element.remove());
+    const data = await window.electronAPI.loadSongs({
+        type: "album",
+        id
+    })
+    console.log(data);
+    if (data) {
+        albumDiv.querySelector(".albumImg").src = data.imgHref;
+        albumDiv.querySelector("#albumName").textContent = data.title;
+        albumDiv.querySelector("#author").textContent = data.author;
+        albumDiv.querySelector("#subtitle").textContent = data.subtitle;
+        albumDiv.querySelector("#subtitle-2").textContent = data.subtitle2;
+        albumDiv.querySelector(".start-album").onclick = () => window.electronAPI.startAlbumIdOnly(id);
+        for (const [index, element] of data.data.entries()) {
+            const clone = songAlbumTemplate.content.cloneNode(true).querySelector(".song-album");
+            clone.querySelector(".index").textContent = index + 1;
+            clone.querySelector(".song-img").src = element.imgHref;
+            clone.querySelector(".textWrapper h1").textContent = element.name;
+            clone.querySelector(".textWrapper h2").textContent = element.plays; // change on plays
+            clone.querySelector(".duration").textContent = element.duration;
+            clone.onclick = () => window.electronAPI.startSongIdOnly(element.id);
+            clone.addEventListener("contextmenu", event => openContextMenu(event, element.id));
+            clone.querySelector("img.more").onclick = event => openContextMenu(event, element.id);
+            songsWrapper.appendChild(clone);
+        }
+    }
+
+    albumDiv.style.zIndex = "7";
+    albumDiv.style.opacity = "1";
+    albumDiv.classList.add("openAnimation");
+    albumDiv.addEventListener("animationend", () => albumDiv.classList.remove("openAnimation"), { once: true });
+}
+function closeAlbum() {
+    isAlbumOpen = false;
+    albumDiv.classList.add("closeAnimation");
+    albumDiv.addEventListener("animationend", () => {
+        albumDiv.classList.remove("closeAnimation");
+        albumDiv.style.zIndex = "0";
+        albumDiv.style.opacity = "0";
+    }, { once: true });
+    if (isArtistOpen) escAction = closeArtist;
+    else escAction = () => {};
 }
 
 class ResultSongMain {
@@ -195,9 +259,7 @@ class ResultAlbumMain {
             event.stopPropagation();
             window.electronAPI.startAlbumIdOnly(this.id);
         }
-        this.#song.onclick = () => {
-            console.log("Open Album");
-        }
+        this.#song.onclick = () => openAlbum(this.id);
         this.#song.querySelector(".play-next").onclick = () => window.electronAPI.playNextAlbumIdOnly(id);
         this.#song.querySelector(".add-to-queue").onclick = () => window.electronAPI.addToQueueAlbumIdOnly(id);
         resultWrapper.appendChild(this.#song);
@@ -240,7 +302,7 @@ class ResultAlbumRegular {
         this.#song.querySelector("h1").textContent = title;
         this.#song.querySelector("h2").textContent = author;
         this.#song.querySelector(".album").src = imgHref;
-        this.#song.onclick = () => console.log("Open Album");
+        this.#song.onclick = () => openAlbum(this.id);
         this.#song.querySelector("img.more").onclick = event => openContextMenu(event, this.id, true);
         this.#song.addEventListener("contextmenu", event => openContextMenu(event, this.id, true));
         resultWrapper.appendChild(this.#song);

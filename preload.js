@@ -52,5 +52,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     playNextAlbumIdOnly: data => ipcRenderer.send("play-next-album-id-only", data),
     addToQueueAlbumIdOnly: data => ipcRenderer.send("add-to-queue-album-id-only", data),
     requireArtist: data => ipcRenderer.invoke("require-artist", data),
-    shuffleArtist: data => ipcRenderer.send("shuffle-artist", data)
+    shuffleArtist: data => ipcRenderer.send("shuffle-artist", data),
+    requireAlbum: data => ipcRenderer.invoke("require-album", data)
 })

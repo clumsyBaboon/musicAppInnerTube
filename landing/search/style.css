@@ -275,44 +275,56 @@ body>.wrapper{
     opacity: 1;
 }
 
-.artist{
-    width: calc(90% - 230px);
+.artist, .albumDiv{
     height: calc(100% - 180px);
     position: fixed;
     box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45);
     background: transparent;
     border-radius: 15px;
     /* transform: rotateY(180deg); */
-    transform-style: preserve-3d;
+    /* transform-style: preserve-3d; */
     z-index: 0;
     opacity: 0;
     outline: 1px solid rgba(255, 255, 255, 0.25);
     outline-offset: -1px;
     backdrop-filter: brightness(0.6) blur(5px);
+    box-sizing: border-box;
+}
+.artist{
+    width: calc(90% - 230px);
+}
+.artist>.wrapper, .albumDiv>.wrapper{
+    max-height: 100%;
+    padding-bottom: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
     overflow-y: auto;
+    border-radius: inherit;
 }
-.artist::-webkit-scrollbar {
-  width: 6px;
+.albumDiv .wrapper{
+    width: 100%;
+    height: 100%;
 }
-.artist::-webkit-scrollbar-track {
-  background: transparent;
+.artist .wrapper::-webkit-scrollbar, .albumDiv .wrapper::-webkit-scrollbar {
+    width: 6px;
 }
-.artist::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+.artist .wrapper::-webkit-scrollbar-track, .albumDiv .wrapper::-webkit-scrollbar-track {
+    background: transparent;
 }
-.artist::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+.artist .wrapper::-webkit-scrollbar-thumb, .albumDiv .wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+.artist .wrapper::-webkit-scrollbar-thumb:hover, .albumDiv .wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
-.artist.openAnimation{
+.artist.openAnimation, .albumDiv.openAnimation{
     animation: playlistOpenAnimationArtist 350ms ease-in-out;
 }
-.artist.closeAnimation{
+.artist.closeAnimation, .albumDiv.closeAnimation{
     animation: playlistCloseAnimationArtist 350ms ease-in-out;
 }
 .artist .header{
@@ -353,8 +365,8 @@ body>.wrapper{
     color: rgba(255, 255, 255, 0.6);
     font-size: 18px;
 }
-.artist #closeArtist{
-    position: fixed;
+.artist #closeArtist, .albumDiv #closeAlbum{
+    position: absolute;
     top: 20px;
     left: 20px;
     cursor: pointer;
@@ -362,13 +374,64 @@ body>.wrapper{
     opacity: 0.6;
     z-index: 23;
 }
-.artist #closeArtist:hover{
+.artist #closeArtist:hover, .albumDiv #closeAlbum:hover{
     transform: scale(1.2);
     opacity: 1;
     transition: transfrom ease-in-out 200ms;
 }
-.artist #closeArtist:active{
+.artist #closeArtist:active, .albumDiv #closeAlbum:active{
     opacity: 0.8;
+}
+
+.artist .albums{
+    width: 90%;
+    height: auto;
+    margin-top: 30px;
+}
+.artist .albums .wrapper{
+    max-width: 100%;
+    display: flex;
+    gap: 20px;
+    overflow-x: scroll;
+}
+.artist .albums .wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.artist .albums .wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.artist .albums .wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.artist .albums .wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.artist .albums .album-artist{
+    min-width: 270px;
+    height: auto;
+    box-sizing: border-box;
+}
+.artist .albums .album-artist img{
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 5px;
+}
+.artist .albums .album-artist img:hover{
+    filter: brightness(0.8);
+    cursor: pointer;
+}
+.artist .albums .album-artist h1, .artist .albums .album-artist h2{
+    font-family: "SF Pro";
+    margin-top: 5px;
+}
+.artist .albums .album-artist h1{
+    color: white;
+    font-size: 18px;
+}
+.artist .albums .album-artist h2{
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 15px;
 }
 
 .artist .top-songs{
@@ -376,7 +439,7 @@ body>.wrapper{
     height: auto;
     margin-top: 30px;
 }
-.artist .top-songs>h1{
+.artist .top-songs>h1, .artist .albums>h1{
     font-family: "SF Pro";
     color: white;
     font-size: 26px;
@@ -393,6 +456,7 @@ body>.wrapper{
     padding: 0 10px;
     border-radius: 10px;
     transition: background-color 200ms;
+    position: relative;
 }
 .artist .top-song:hover{
     background-color: rgba(255, 255, 255, 0.15);
@@ -434,6 +498,196 @@ body>.wrapper{
     color: rgba(255, 255, 255, 0.4);
     font-size: 14px;
     min-width: 15%;
+}
+
+.albumDiv{
+    width: calc(80% - 230px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.albumDiv .album-img-transparent{
+    width: 40%;
+    max-width: 30vh;
+    aspect-ratio: 1 / 1;
+    margin-top: 25px;
+}
+.albumDiv img.albumImg{
+    width: 40%;
+    max-width: 30vh;
+    aspect-ratio: 1 / 1;
+    outline: 2px solid rgba(100, 100, 100, 0.6);
+    border-radius: 15px;
+    background-size: cover;
+    /* margin-top: 20px; */
+    top: 25px;
+    position: absolute;
+}
+.albumDiv #albumName{
+    color: white;
+    margin-bottom: 10px;
+    font-family: 'SF Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 25px;
+}
+.albumDiv .subtitle{
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 5px;
+    font-family: "SF Pro";
+    font-weight: 600;
+    font-size: 16px;
+}
+.albumDiv #subtitle-2{
+    margin-bottom: 15px;
+}
+.albumDiv .start-album{
+    width: auto;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    border-radius: 34px;
+    box-shadow: -1px -1px 0 0 rgba(255, 255, 255, 0.20) inset, 1px 1px 0 0 rgba(255, 255, 255, 0.20) inset;
+    background-color: rgba(0, 0, 0, 0.17);
+    user-select: none;
+    transition: background-color 200ms;
+    margin-bottom: 30px;
+}
+.albumDiv .start-album:hover{
+    background-color: rgba(153, 153, 153, 0.25);
+}
+.albumDiv .start-album:active{
+    background-color: rgba(153, 153, 153, 0.45);
+}
+.albumDiv .start-album img{
+    width: 30px;
+    height: 30px;
+    margin-left: 25px;
+}
+.albumDiv .start-album p{
+    color: rgba(255, 255, 255, 0.85);
+    font-family: "SF Pro";
+    font-size: 13px;
+    font-weight: 590;
+    line-height: 16px;
+    margin-left: 15px;
+    margin-right: 25px;
+}
+.albumDiv .songs{
+    width: 85%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* background: rgba(20, 20, 20, 0.4); */
+    backdrop-filter: blur(5px) brightness(0.5);
+    z-index: 22;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+    border-radius: 15px;
+    outline: 1px solid rgba(255, 255, 255, 0.25);
+    outline-offset: -1px;
+    padding: 15px 0;
+    margin-top: 20px;
+}
+
+/* song */
+.albumDiv .songs .song-album{
+    width: 80%;
+    min-height: 70px;
+    border-top: 2px solid rgba(255, 255, 255, 0.40);
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    transition: background-color 200ms;
+    box-sizing: border-box;
+    user-select: none;
+}
+/* hover */
+.albumDiv .songs .song-album:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+.albumDiv .songs .song-album:active {
+    background-color: rgba(255, 255, 255, 0.30);
+}
+
+.albumDiv .songs .song-album:has(.more:hover) {
+    background-color: transparent;
+}
+.albumDiv .songs .song-album:has(.more:active) {
+    background-color: transparent;
+}
+/* hover */
+.albumDiv .songs .song-album p{
+    font-family: "SF Pro";
+    line-height: 16px;
+}
+.albumDiv .songs .song-album .index{
+    min-width: 30px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    font-family: "SF Pro";
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 16px;
+}
+.albumDiv .songs .song-album img.song-img{
+    width: 50px;
+    height: 50px;
+    margin-left: 15px;
+    border-radius: 5px;
+    outline: 2px solid rgba(100, 100, 100, 0.6);
+}
+.albumDiv .songs .song-album .textWrapper{
+    width: 100%;
+    margin-left: 20px;
+}
+.albumDiv .songs .song-album .textWrapper h1, .albumDiv .songs .song-album .textWrapper h2{
+    width: 100%;
+}
+.albumDiv .songs .song-album .textWrapper h1{
+    color: rgba(255, 255, 255, 1);
+    font-family: "SF Pro";
+    font-size: 17px;
+    font-weight: 590;
+    line-height: 16px;
+}
+.albumDiv .songs .song-album .textWrapper h2{
+    color: rgba(255, 255, 255, 0.6);
+    font-family: "SF Pro";
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+    margin-top: 10px;
+}
+.albumDiv .songs .song-album img.more{
+    width: 30px;
+    height: 30px;
+    margin-right: 20px;
+    margin-left: 20px;
+    opacity: 0.60;
+    transition: opacity 200ms;
+    border-radius: 5px;
+}
+.albumDiv .songs .song-album img.more:hover{
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.albumDiv .songs .song-album img.more:active{
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.albumDiv .songs .song-album img.more:active{
+    opacity: 1;
+}
+.albumDiv .songs .song-album p.duration{
+    color: rgba(255, 255, 255, 0.6);
+    font-family: "SF Pro";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 510;
+    line-height: 16px;
+    margin-left: 20px;
 }
 
 @keyframes playlistOpenAnimationArtist {

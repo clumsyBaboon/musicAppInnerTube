@@ -323,6 +323,10 @@ function addToQueue(data) {
 }
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+ipcMain.handle("require-album", async (event, id) => {
+    return `ID: ${id}`;
+})
+
 ipcMain.on("shuffle-artist", async (event, id) => {
     const artist = await youtube.music.getArtist(id);
     const songs = await artist.getAllSongs();
@@ -366,7 +370,8 @@ ipcMain.handle("require-artist", async (event, id) => {
             imgHref: artist.header?.thumbnail?.contents?.[0]?.url,
             title: artist.header?.title?.text
         },
-        topSongs: []
+        topSongs: [],
+        albums: []
     }
     //topSongs
     for (const element of artist.sections?.[0].contents.filterType(YTNodes.MusicResponsiveListItem)) {
@@ -377,6 +382,15 @@ ipcMain.handle("require-artist", async (event, id) => {
             album: element.flex_columns?.[3].title?.text,
             imgHref: element.thumbnail?.contents?.at(-1)?.url,
             id: element.id 
+        })
+    }
+    //albums
+    for (const element of artist.sections?.[1].contents.filterType(YTNodes.MusicTwoRowItem)) {
+        dataSend.albums.push({
+            title: element?.title?.text,
+            imgHref: element?.thumbnail?.[0]?.url,
+            year: element.year ?? "",
+            id: element.id
         })
     }
     return dataSend;
@@ -814,6 +828,8 @@ ipcMain.handle("load-songs", async (event, data) => {
         const album = await youtube.music.getAlbum(data.id);
         const subtitle = album?.header?.subtitle?.text ?? "";
         const subtitle2 = album?.header?.second_subtitle?.text ?? "";
+        const title = album?.header?.title?.text ?? "";
+        const imgHref = album?.header?.thumbnail?.contents?.[0]?.url;
         const author = album?.header?.strapline_text_one?.text ?? "";
         const thumbnail = album.header.thumbnail.contents?.at(-1).url;
         const allSongs = [];
@@ -823,10 +839,11 @@ ipcMain.handle("load-songs", async (event, data) => {
                 author,
                 imgHref: thumbnail,
                 duration: element.duration.text,
-                id: element.id
+                id: element.id,
+                plays: element?.flex_columns?.[2]?.title?.text ?? ""
             })
         }
-        return {data: allSongs, subtitle, subtitle2};
+        return {data: allSongs, subtitle, subtitle2, title, imgHref, author};
     }
     return false;
 })
