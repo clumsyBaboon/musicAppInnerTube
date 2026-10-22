@@ -120,8 +120,9 @@ async function openArtist(id) {
     const data = await window.electronAPI.requireArtist(id);
     console.log(data);
     if (data) {
-        artistDiv.querySelector(".header img").src = data.header.imgHref;
+        artistDiv.querySelector(".header img.bg").src = data.header.imgHref;
         artistDiv.querySelector(".header h1").textContent = data.header.title;
+        artistDiv.querySelector(".header .shuffle").onclick = window.electronAPI.shuffleArtist(id);
         //topSongs
         document.querySelectorAll(".artist .top-songs .top-song").forEach(element => element.remove());
         for (const element of data.topSongs) {
