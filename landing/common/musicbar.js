@@ -149,12 +149,16 @@ btnPrev.addEventListener("click", () => {
 });
 
 queueList.addEventListener("dragstart", event => {
+    const target = event.target.closest("li");
+    if (!target) return;
     const items = Array.from(document.querySelectorAll(".musicbar .queue-list li"));
-    dragIndex = items.indexOf(event.target);
-    event.target.classList.add("dragging");
+    dragIndex = items.indexOf(target);
+    target.classList.add("dragging");
 })
 queueList.addEventListener("dragend", event => {
-    event.target.classList.remove("dragging");
+    const target = event.target.closest("li");
+    if (!target) return;
+    target.classList.remove("dragging");
     document.querySelectorAll(".musicbar .queue-list li").forEach(element => element.classList.remove("put-after"));
     if (putAfter) {
         const items = Array.from(document.querySelectorAll(".musicbar .queue-list .song"));
@@ -173,7 +177,7 @@ queueList.addEventListener("dragend", event => {
         window.electronAPI.newQueue({
             newQueue, nowPlaying
         })
-        putAfter.after(event.target);
+        putAfter.after(target);
     }
 })
 queueList.addEventListener("dragover", event => {
@@ -351,15 +355,31 @@ class SongQueue {
         this.#song.querySelector(".song-img").src = this.imgHref;
         this.#song.querySelector(".duration").textContent = this.duration;
         this.#song.onclick = () => this.goTo();
+        this.#song.querySelector("img.delete").onclick = event => {
+            event.stopPropagation();
+            queue.splice(this.index, 1);
+            const newQueue = queue.map(item => Object.assign({}, item));
+            newQueue.forEach(element => delete element.index);
+            console.log(`Delete: ${this.name}`);
+            if (this.index < nowPlaying) {
+                nowPlaying--;
+            }
+            window.electronAPI.newQueue({
+                newQueue,
+                nowPlaying
+            })
+        }
         queueList.appendChild(this.#song);
     }
 
     clearPlaying() {
         this.#song.classList.remove("playing");
+        this.#song.querySelector("img.delete").style.display = "block";
     }
 
     makePlaying() {
         this.#song.classList.add("playing");
+        this.#song.querySelector("img.delete").style.display = "none";
     }
     
     goTo() {

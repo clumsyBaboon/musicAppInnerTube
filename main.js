@@ -564,6 +564,7 @@ ipcMain.on("add-to-queue-album-id-only", async (event, data) => {
 ipcMain.on("new-queue", (event, data) => {
     queue = data.newQueue;
     nowPlaying = data.nowPlaying;
+    win.webContents.send("new-queue", ({queue, nowPlaying}));
 })
 
 ipcMain.on("go-to", (event, data) => {

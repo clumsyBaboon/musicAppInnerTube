@@ -394,6 +394,22 @@
     margin-left: 10px;
     margin-right: 10px;
 }
+.musicbar .queue-list .song img.delete{
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    margin-left: 10px;
+    opacity: 0.60;
+    transition: opacity 200ms;
+    border-radius: 5px;
+}
+.musicbar .queue-list .song img.delete:hover{
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.musicbar .queue-list .song img.delete:active{
+    background-color: rgba(255, 255, 255, 0.2);
+    opacity: 1;
+}
 .musicbar .lyrics-list{
     width: calc(100% - 70px);
     height: 90%;
