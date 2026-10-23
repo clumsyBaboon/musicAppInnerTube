@@ -122,7 +122,7 @@ async function openArtist(id) {
     if (data) {
         artistDiv.querySelector(".header img.bg").src = data.header.imgHref;
         artistDiv.querySelector(".header h1").textContent = data.header.title;
-        artistDiv.querySelector(".header .shuffle").onclick = window.electronAPI.shuffleArtist(id);
+        artistDiv.querySelector(".header .shuffle").onclick = () => window.electronAPI.shuffleArtist(id);
         //topSongs
         document.querySelectorAll(".artist .top-songs .top-song").forEach(element => element.remove());
         for (const element of data.topSongs) {
