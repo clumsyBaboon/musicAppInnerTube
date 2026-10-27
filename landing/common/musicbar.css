@@ -311,6 +311,24 @@
 .musicbar .queue-list .first.put-after{
     margin-bottom: 90px;
 }
+.musicbar .queue-list li.btn-load-more{
+    width: 250px;
+    height: 30px;
+    font-family: "SF Pro";
+    font-size: 16px;
+    font-weight: 400;
+    color: white;
+    box-shadow: 0 -1px 0 0 rgba(255, 255, 255, 0.50) inset, 0 1px 0 0 rgba(255, 255, 255, 0.50) inset;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+    margin: 15px auto;
+}
+.musicbar .queue-list li.btn-load-more:active{
+    filter: brightness(0.7);
+}
 /* song */
 .musicbar .queue-list .song{
     width: 100%;
@@ -394,7 +412,7 @@
     margin-left: 10px;
     margin-right: 10px;
 }
-.musicbar .queue-list .song img.delete{
+.musicbar .queue-list .song img.delete, .musicbar .queue-list .song img.mix{
     width: 30px;
     height: 30px;
     margin-right: 10px;
@@ -403,10 +421,13 @@
     transition: opacity 200ms;
     border-radius: 5px;
 }
-.musicbar .queue-list .song img.delete:hover{
+.musicbar .queue-list .song img.mix{
+    display: none;
+}
+.musicbar .queue-list .song img.delete:hover, .musicbar .queue-list .song img.mix:hover{
     background-color: rgba(255, 255, 255, 0.1);
 }
-.musicbar .queue-list .song img.delete:active{
+.musicbar .queue-list .song img.delete:active, .musicbar .queue-list .song img.mix:active{
     background-color: rgba(255, 255, 255, 0.2);
     opacity: 1;
 }

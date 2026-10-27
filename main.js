@@ -12,6 +12,7 @@ const { title } = require('process');
 const { type } = require('os');
 const { resolve } = require('dns');
 const { rejects } = require('assert');
+const { start } = require('repl');
 
 let COOKIE;
 
@@ -33,6 +34,8 @@ let queue = [];
 let nowPlaying = 0;
 let currentTime = 0;
 let waitForNext = false;
+
+let continuationMix = null;
 
 let isQuit = false;
 
@@ -323,14 +326,64 @@ function addToQueue(data) {
 }
 
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
-ipcMain.handle("require-album", async (event, id) => {
-    return `ID: ${id}`;
+ipcMain.on("load-more-mix", async () => {
+    let related;
+    if (!continuationMix) {
+        const info = await youtube.music.getInfo(queue.at(-1).id);
+        related = await info.getUpNext(true);
+    }
+    else {
+        related = (await youtube.actions.execute("./next", {
+            client: "YTMUSIC",
+            continuation: continuationMix,
+            parse: true
+        })).continuation_contents;
+    }
+    continuationMix = related.continuation;
+    for (const element of related.contents.filterType(YTNodes.PlaylistPanelVideo)) {
+        let author = element.artists?.[0]?.name ?? "Unknown";
+        if (element.artists?.length > 1) author += " and more";
+        queue.push({
+            name: element.title.text,
+            author,
+            imgHref: element.thumbnail?.at(-1).url,
+            duration: element.duration.text,
+            id: element.video_id
+        })
+    }
+    win.webContents.send("new-queue", {queue, nowPlaying});
+})
+
+ipcMain.on("start-mix", async (event, id) => {
+    const info = await youtube.music.getInfo(id);
+    const related = await info.getUpNext(true);
+    continuationMix = related.continuation ?? null;
+    const nowPlayingQueue = queue[nowPlaying];
+    queue = [];
+    queue.push(nowPlayingQueue);
+    nowPlaying = 0;
+
+    for (const element of related.contents.filterType(YTNodes.PlaylistPanelVideo)) {
+        if (element.video_id == queue[0].id) continue;
+        let author = element.artists?.[0]?.name ?? "Unknown";
+        if (element.artists?.length > 1) author += " and more";
+        queue.push({
+            name: element.title.text,
+            author,
+            imgHref: element.thumbnail?.at(-1).url,
+            duration: element.duration.text,
+            id: element.video_id
+        })
+    }
+    win.webContents.send("new-queue", {queue, nowPlaying});
+    startSong(queue[0].id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
 })
 
 ipcMain.on("shuffle-artist", async (event, id) => {
     const artist = await youtube.music.getArtist(id);
     const songs = await artist.getAllSongs();
     queue = [];
+    continuationMix = null;
     nowPlaying = 0;
 
     for (const element of songs.contents.filterType(YTNodes.MusicResponsiveListItem)) {
@@ -350,6 +403,7 @@ ipcMain.on("shuffle-artist", async (event, id) => {
 ipcMain.on("start-album-id-only", async (event, id) => {
     const album = await youtube.music.getAlbum(id);
     queue = [];
+    continuationMix = null;
     nowPlaying = 0;
     for (const element of album.contents.filterType(YTNodes.MusicResponsiveListItem)) {
         queue.push({
@@ -636,6 +690,7 @@ ipcMain.on("start-song", (event, data) => {
     const id = data.id;
     print(`Starting song playing... ID: ${id}`);
     queue = data.queue;
+    continuationMix = null;
     nowPlaying = data.index;
 
     startSong(id).catch(err => print(`Error in reading/writing temp folder: ${err}`));
@@ -652,6 +707,7 @@ ipcMain.on("start-song-id-only", async (event, data) => {
         duration: secToMin(songInfo.basic_info.duration),
         id: songInfo.basic_info.id
     }]
+    continuationMix = null;
     nowPlaying = 0;
 
     startSong(id).catch(err => print(`Error in reading/writing temp folder: ${err}`));

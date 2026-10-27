@@ -137,6 +137,7 @@ async function openArtist(id) {
             clone.querySelector(".album-play").onclick = () => window.electronAPI.startSongIdOnly(element.id);
             document.querySelector(".artist .top-songs").appendChild(clone);
         }
+        //albums
         document.querySelectorAll(".artist .albums .wrapper .album-artist").forEach(element => element.remove());
         for (const element of data.albums) {
             const clone = document.querySelector(".artist #album-artist-template").content.cloneNode(true).querySelector(".album-artist");
@@ -144,6 +145,7 @@ async function openArtist(id) {
             clone.querySelector("h1").textContent = element.title;
             clone.querySelector("h2").textContent = element.year;
             clone.onclick = () => openAlbum(element.id);
+            clone.addEventListener("contextmenu", event => openContextMenu(event, element.id, true));
             document.querySelector(".artist .albums .wrapper").appendChild(clone);
         }
     }
@@ -261,8 +263,14 @@ class ResultAlbumMain {
             window.electronAPI.startAlbumIdOnly(this.id);
         }
         this.#song.onclick = () => openAlbum(this.id);
-        this.#song.querySelector(".play-next").onclick = () => window.electronAPI.playNextAlbumIdOnly(id);
-        this.#song.querySelector(".add-to-queue").onclick = () => window.electronAPI.addToQueueAlbumIdOnly(id);
+        this.#song.querySelector(".play-next").onclick = event => {
+            event.stopPropagation();
+            window.electronAPI.playNextAlbumIdOnly(id);
+        }
+        this.#song.querySelector(".add-to-queue").onclick = event => {
+            event.stopPropagation();
+            window.electronAPI.addToQueueAlbumIdOnly(id);
+        }
         resultWrapper.appendChild(this.#song);
     }
 }

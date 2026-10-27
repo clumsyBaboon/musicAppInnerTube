@@ -39,6 +39,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     playNext: data => ipcRenderer.send("play-next", data),
     addToQueue: data => ipcRenderer.send("add-to-queue", data),
     requireLyrics: data => ipcRenderer.invoke("require-lyrics", data),
+    startMix: data => ipcRenderer.send("start-mix", data),
+    loadMoreMix: data => ipcRenderer.send("load-more-mix"),
 
     onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
     onNewQueue: callback => ipcRenderer.on("new-queue", (event, data) => callback(data)),
@@ -52,6 +54,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     playNextAlbumIdOnly: data => ipcRenderer.send("play-next-album-id-only", data),
     addToQueueAlbumIdOnly: data => ipcRenderer.send("add-to-queue-album-id-only", data),
     requireArtist: data => ipcRenderer.invoke("require-artist", data),
-    shuffleArtist: data => ipcRenderer.send("shuffle-artist", data),
-    requireAlbum: data => ipcRenderer.invoke("require-album", data)
+    shuffleArtist: data => ipcRenderer.send("shuffle-artist", data)
 })

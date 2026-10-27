@@ -211,6 +211,7 @@ function newQueue(tempQueue) {
         queue[nowPlaying].makePlaying();
         queue[nowPlaying].scrollToThis();
     }
+    queueList.querySelector(".btn-load-more").onclick = () => window.electronAPI.loadMoreMix();
 }
 document.querySelector(".musicbar .open-close").addEventListener("click", async () => {
     isBigMusicbarOpen = !isBigMusicbarOpen;
@@ -369,17 +370,23 @@ class SongQueue {
                 nowPlaying
             })
         }
-        queueList.appendChild(this.#song);
+        this.#song.querySelector("img.mix").onclick = event => {
+            event.stopPropagation();
+            window.electronAPI.startMix(this.id);
+        }
+        queueList.insertBefore(this.#song, queueList.querySelector(".btn-load-more"));
     }
 
     clearPlaying() {
         this.#song.classList.remove("playing");
         this.#song.querySelector("img.delete").style.display = "block";
+        this.#song.querySelector("img.mix").style.display = "none";
     }
 
     makePlaying() {
         this.#song.classList.add("playing");
         this.#song.querySelector("img.delete").style.display = "none";
+        this.#song.querySelector("img.mix").style.display = "block";
     }
     
     goTo() {
