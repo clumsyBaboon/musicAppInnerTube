@@ -212,6 +212,8 @@ async function connectToYoutube() {
         }
     } catch (err) {
         print(`Func connectToYoutube. ${err}`, "err");
+        config.autoCookie = false;
+        saveConfig();
         win.reload();
     }
 }
