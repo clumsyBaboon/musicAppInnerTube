@@ -325,7 +325,20 @@ function addToQueue(data) {
     }
 }
 
+function shuffleArray(arr, startFrom) {
+    for (let i = arr.length - 1; i > startFrom; i--) {
+        const j = Math.floor(Math.random() * (i - startFrom + 1)) + startFrom;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
 // ===== ФУНКЦИИ ИЗ ELECTRON =====
+ipcMain.on("shuffle", () => {
+    if (queue.length == 0) return;
+    shuffleArray(queue, nowPlaying + 1);
+    win.webContents.send("new-queue", {queue, nowPlaying});
+})
+
 ipcMain.on("load-more-mix", async () => {
     let related;
     if (!continuationMix) {

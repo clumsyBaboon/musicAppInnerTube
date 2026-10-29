@@ -10,6 +10,7 @@ const duration = document.querySelector(".musicbar .wrapper-big .duration");
 const songQueueTemplate = document.querySelector(".musicbar #queue-song");
 const queueList = document.querySelector(".musicbar .queue-list");
 const lyricsList = document.querySelector(".musicbar .lyrics-list");
+const shuffleBtn = document.querySelector(".musicbar .shuffle");
 
 const queueButton = document.querySelector(".musicbar #queue-btn");
 const lyricsButton = document.querySelector(".musicbar #lyrics-btn");
@@ -30,6 +31,10 @@ let lastLyrName = null;
 let lastLyr = null;
 let lyricsGlobal = null;
 let lyrcisType = 0; // 0 none, 1 plain, 2 synced
+
+shuffleBtn.addEventListener("click", () => {
+    window.electronAPI.shuffle();
+})
 
 const volumeRange = document.querySelector(".musicbar #volume-range-small");
 const volumeBtn = document.querySelector(".musicbar .volume");

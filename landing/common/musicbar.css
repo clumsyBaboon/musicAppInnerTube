@@ -145,6 +145,13 @@
     opacity: var(--opacity-music-bar);
     background-image: url(../img/speaker0.svg);
 }
+.musicbar .wrapper-small .shuffle{
+    min-width: 32px;
+    min-height: 32px;
+    margin-right: 10px;
+    opacity: var(--opacity-music-bar);
+    background-image: url(../img/shuffle.svg);
+}
 .musicbar .wrapper-small .volume-wrapper{
     min-width: 100px;
     height: 6px;

@@ -40,7 +40,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     addToQueue: data => ipcRenderer.send("add-to-queue", data),
     requireLyrics: data => ipcRenderer.invoke("require-lyrics", data),
     startMix: data => ipcRenderer.send("start-mix", data),
-    loadMoreMix: data => ipcRenderer.send("load-more-mix"),
+    loadMoreMix: () => ipcRenderer.send("load-more-mix"),
+    shuffle: () => ipcRenderer.send("shuffle"),
 
     onStateUpdate: callback => ipcRenderer.on("state-update", (event, data) => callback(data)),
     onNewQueue: callback => ipcRenderer.on("new-queue", (event, data) => callback(data)),
