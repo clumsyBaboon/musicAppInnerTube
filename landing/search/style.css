@@ -276,7 +276,6 @@ body>.wrapper{
 }
 
 .artist, .albumDiv{
-    height: calc(100% - 180px);
     position: fixed;
     box-shadow: 0px 18px 48px rgba(0, 0, 0, 0.45);
     background: transparent;
@@ -287,11 +286,12 @@ body>.wrapper{
     opacity: 0;
     outline: 1px solid rgba(255, 255, 255, 0.25);
     outline-offset: -1px;
-    backdrop-filter: brightness(0.6) blur(5px);
+    backdrop-filter: brightness(0.4) blur(8px);
     box-sizing: border-box;
 }
 .artist{
     width: calc(90% - 230px);
+    height: calc(100% - 180px);
 }
 .artist>.wrapper, .albumDiv>.wrapper{
     max-height: 100%;
@@ -505,10 +505,12 @@ body>.wrapper{
 }
 
 .albumDiv{
-    width: calc(80% - 230px);
+    width: calc(85% - 230px);
+    height: calc(95% - 180px);
     display: flex;
     flex-direction: column;
     align-items: center;
+    top: calc(80px + 2.5%);
 }
 .albumDiv .album-img-transparent{
     width: 40%;
