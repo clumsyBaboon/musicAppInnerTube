@@ -252,7 +252,8 @@ async function startSong(id) {
     let response = {
         title: trackInfo.basic_info.title,
         author: trackInfo.basic_info.author,
-        imgHref: trackInfo.basic_info.thumbnail?.[0]?.url
+        imgHref: trackInfo.basic_info.thumbnail?.[0]?.url,
+        duration: trackInfo.basic_info.duration
     }
     fs.mkdirSync(path.join(app.getPath("userData"), "temp"), { recursive: true });
 

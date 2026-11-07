@@ -23,6 +23,7 @@ let lastId = null;
 let queue = [];
 let nowPlaying = -1;
 let isNowPlaying = false;
+let duration_let;
 
 let putAfter = null;
 let dragIndex = 0;
@@ -124,6 +125,7 @@ window.electronAPI.onStateUpdate(data => {
     if (isBigMusicbarOpen) albumImgBig.style.transform = data.isNowPlaying ? "scale(1)" : "scale(0.8)";
     title.textContent = data.title;
     author.textContent = data.artist;
+    duration_let = data.duration;
     timelineRange.max = Math.floor(data.duration);
     duration.textContent = secToMin(Math.floor(data.duration));
     if (queue && isBigMusicbarOpen) {
@@ -288,7 +290,7 @@ async function loadNewLyrics() {
 
     const _title = title.textContent;
     const _author = author.textContent;
-    const _duration = timelineRange.max;
+    const _duration = duration_let;
     lastLyrName = _title;
     if (!_title || !_author || !_duration) return;
     const [type, lyrics] = await window.electronAPI.requireLyrics({

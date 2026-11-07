@@ -3,6 +3,7 @@ const audio = document.querySelector("#audio");
 let title;
 let artist;
 let imgHref;
+let duration = 0;
 
 let isNowPlaying = false;
 let isActive = false;
@@ -10,12 +11,11 @@ let isActive = false;
 let stateInterval;
 
 let lastCurrentTime = 0;
-let lastDuration = 0;
 
 function sendState() {
     const data = {
         currentTime: lastCurrentTime,
-        duration: lastDuration,
+        duration,
         title,
         artist,
         imgHref,
@@ -31,6 +31,7 @@ window.electronAPI.onStartSong(data => {
     isActive = true;
     title = data.title;
     artist = data.author;
+    duration = data.duration;
     imgHref = data.imgHref;
     stateInterval = setInterval(() => {
         if (!isActive) {
@@ -96,7 +97,6 @@ if ("mediaSession" in navigator) {
 audio.addEventListener("timeupdate", () => {
     if (!isActive) return;
     lastCurrentTime = audio.currentTime;
-    lastDuration = audio.duration;
     sendState();
 })
 
