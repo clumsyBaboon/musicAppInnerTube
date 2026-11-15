@@ -13,6 +13,7 @@ const { type } = require('os');
 const { resolve } = require('dns');
 const { rejects } = require('assert');
 const { start } = require('repl');
+const { time } = require('console');
 
 let COOKIE;
 
@@ -294,7 +295,9 @@ async function startSong(id) {
     } else {
         response.filePath = filePath;
     }
-    
+
+    await trackInfo.addToWatchHistory().catch(err => print(`Err addToWatchHistory: ${err}`, "err"));
+
     soundWin.webContents.send("start-song", response);
 }
 
