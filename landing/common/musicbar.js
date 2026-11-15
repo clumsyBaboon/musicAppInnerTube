@@ -330,20 +330,71 @@ async function loadNewLyrics() {
             lyrcisType = 2;
             break;
         }
+        case "word-synced": {
+            console.log(lyrics);
+            loadElement.remove();
+            for (const element of lyrics) {
+                const pElement = document.createElement("p");
+                pElement.onclick = () => window.electronAPI.seekTo(element.start_ms / 1000);
+                for (const word of element.words) {
+                    const spanElement = document.createElement("span");
+                    spanElement.textContent = word.text;
+                    const durationSec = word.end_ms - word.start_ms;
+                    spanElement.style.setProperty("--dur", `${durationSec}ms`);
+                    pElement.appendChild(spanElement);
+                }
+                lyricsList.insertBefore(pElement, lyricsList.lastElementChild);
+            }
+            lyricsGlobal = lyrics;
+            lyrcisType = 3;
+            break;
+        }
     }
 }
 function updateLyrics(curTime) {
-    if (!lyricsGlobal || lyrcisType != 2) return;
-    const pElements = document.querySelectorAll(".musicbar .lyrics-list p");
-    let lastTemp = null;
-    for (const [index, element] of lyricsGlobal.entries()) {
-        if (element.start_ms <= curTime) {
-            pElements[index].classList.add("active");
-            lastTemp = index;
-        } else pElements[index].classList.remove("active");
+    if (!lyricsGlobal) return;
+    if (lyrcisType == 2) {
+        const pElements = document.querySelectorAll(".musicbar .lyrics-list p");
+        let lastTemp = null;
+        for (const [index, element] of lyricsGlobal.entries()) {
+            if (element.start_ms <= curTime) {
+                pElements[index].classList.add("active");
+                lastTemp = index;
+            } else pElements[index].classList.remove("active");
+        }
+        if (lastLyr != lastTemp && lastTemp) pElements[lastTemp].scrollIntoView({ block: "center", behavior: "smooth" });
+        lastLyr = lastTemp;
+    } else if (lyrcisType == 3) {
+        const pElements = document.querySelectorAll(".musicbar .lyrics-list p");
+        let lastTemp = null;
+        for (const [index, element] of lyricsGlobal.entries()) {
+            const spanElements = pElements[index].querySelectorAll("span");
+            if (element.start_ms <= curTime && element.end_ms >= curTime) {
+                for (const [indexWord, elementWord] of element.words.entries()) {
+                    const span = pElements[index].querySelectorAll("span")[indexWord];
+                    if (elementWord.start_ms <= curTime && elementWord.end_ms >= curTime) {
+                        span.classList.remove("past");
+                        span.classList.add("active");
+                    } else if (elementWord.start_ms <= curTime && elementWord.end_ms <= curTime) {
+                        span.classList.remove("active");
+                        span.classList.add("past");
+                    } else {
+                        span.classList.remove("active", "past");
+                    }
+                }
+                lastTemp = index;
+            } else if (element.end_ms <= curTime) {
+                spanElements.forEach(item => {
+                    item.classList.add("past");
+                    item.classList.remove("active");
+                })
+            } else {
+                spanElements.forEach(item => item.classList.remove("active", "past"));
+            }
+        }
+        if (lastLyr != lastTemp && lastTemp) pElements[lastTemp].scrollIntoView({ block: "center", behavior: "smooth" });
+        lastLyr = lastTemp;
     }
-    if (lastLyr != lastTemp && lastTemp) pElements[lastTemp].scrollIntoView({ block: "center", behavior: "smooth" });
-    lastLyr = lastTemp;
 }
 
 class SongQueue {

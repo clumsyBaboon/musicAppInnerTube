@@ -559,7 +559,15 @@ ipcMain.handle("require-lyrics", async (event, data) => {
         const responseJson = await response.json();
         const responseYaml = yaml.parse(responseJson.lyricsfile);
         if (typeOfLyrics >= 2 && responseJson.hasWordSync) {
-            return ["error", "Working on this type. Select Plain or Synced lyrics in setting instead"];
+            let sendLyr = [];
+            for (const element of responseYaml.lines) {
+                for (const [index, elementWord] of element.words.entries()) {
+                    if (index == element.words.length - 1) elementWord.end_ms = element.end_ms;
+                    else elementWord.end_ms = element.words[index + 1].start_ms;
+                }
+                sendLyr.push(element);
+            }
+            return ["word-synced", sendLyr];
         }
         if (typeOfLyrics >= 1 && responseYaml.lines?.length != 0) {
             let sendLyr = [];

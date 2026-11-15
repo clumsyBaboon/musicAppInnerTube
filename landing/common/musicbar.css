@@ -471,6 +471,34 @@
 .musicbar .lyrics-list p:hover{
     color: rgba(255, 255, 255, 70%);
 }
+.musicbar .lyrics-list p span.past, .musicbar .lyrics-list p span.active{
+    font-size: 22px;
+    font-weight: 600;
+    white-space: pre-wrap;
+    transition: font-weight 200ms, text-shadow 200ms;
+}
+.musicbar .lyrics-list p span.past{
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 0 0 3px white;
+}
+.musicbar .lyrics-list p span.active{
+    display: inline-block;
+    color: transparent;
+    background-image: linear-gradient(
+        to right,
+        #fff 0%, #fff 40%,
+        rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0.5) 100%
+    );
+    background-size: 250% 100%;
+    background-position: 100% 0; 
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: fill var(--dur, 0ms) linear forwards;
+}
+@keyframes fill {
+  from { background-position: 100% 0; }
+  to   { background-position: 0% 0; }
+}
 .musicbar .lyrics-list .wrapper{
     min-height: 15vh;
     background-color: transparent;
