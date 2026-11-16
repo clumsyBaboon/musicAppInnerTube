@@ -1,7 +1,7 @@
 {
   "name": "music-app-innertube",
   "productName": "Youtube Music",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "",
   "homepage": "https://github.com/clumsyBaboon/musicAppInnerTube#readme",
   "bugs": {
@@ -20,11 +20,11 @@
   },
   "devDependencies": {
     "electron": "^44.0.0",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^25.1.0"
   },
   "dependencies": {
     "yaml": "^2.9.1",
-    "youtubei.js": "^18.1.0"
+    "youtubei.js": "^18.3.0"
   },
   "build": {
     "appId": "com.clumsyBaboon.ytmusic",

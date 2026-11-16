@@ -188,6 +188,7 @@ async function connectToYoutube() {
                 useContentSize: true,
                 show: false,
                 webPreferences: {
+                    scrollBounce: true,
                     preload: path.join(__dirname, "preload.js")
                 }
             })
@@ -910,6 +911,7 @@ ipcMain.handle("load-songs", async (event, data) => {
     } else if (data.type == "album") {
         print(`Load songs of album: ${data.id}`);
         const album = await youtube.music.getAlbum(data.id);
+        write(album)
         const subtitle = album?.header?.subtitle?.text ?? "";
         const subtitle2 = album?.header?.second_subtitle?.text ?? "";
         const title = album?.header?.title?.text ?? "";
@@ -928,6 +930,7 @@ ipcMain.handle("load-songs", async (event, data) => {
             })
         }
         return {data: allSongs, subtitle, subtitle2, title, imgHref, author};
+        return null
     }
     return false;
 })
